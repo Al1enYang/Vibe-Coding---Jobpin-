@@ -312,6 +312,75 @@ CLAUDE.md                      # Claude Code 协作入口
    - 配置邮件模板(可选)
    - 使用 Clerk 默认行为即可
 
+**LLM JSON 验证策略（服务端）**:
+
+1. **最小字段集合**（与 spec.md §3.1-E 一致）:
+   ```typescript
+   {
+     fullName?: string;      // 姓名
+     email?: string;         // 邮箱
+     phone?: string;         // 电话
+     skills: string[];       // 技能数组（可为空）
+     experiences: {          // 工作经历数组
+       company: string;
+       title: string;
+       start: string;        // startDate（如 "2020-01"）
+       end?: string;         // endDate（可选，如 "2023-12"）
+       summary?: string;
+     }[];
+     resumeSummary?: string; // 简历总结
+   }
+   ```
+
+2. **Zod Schema 定义**（`web/lib/schemas.ts`）:
+   ```typescript
+   import { z } from 'zod';
+
+   export const ExperienceSchema = z.object({
+     company: z.string(),
+     title: z.string(),
+     start: z.string(),
+     end: z.string().optional(),
+     summary: z.string().optional(),
+   });
+
+   export const ResumeParseResultSchema = z.object({
+     fullName: z.string().optional(),
+     email: z.string().optional(),
+     phone: z.string().optional(),
+     skills: z.array(z.string()).default([]),
+     experiences: z.array(ExperienceSchema).default([]),
+     resumeSummary: z.string().optional(),
+   });
+   ```
+
+3. **校验策略**（`/api/resume/parse` 路由）:
+   ```typescript
+   // LLM 输出后，立即用 Zod 校验
+   const llmOutput = await organizeWithLLM(parsedText);
+
+   // Zod 校验
+   const validationResult = ResumeParseResultSchema.safeParse(llmOutput);
+
+   if (!validationResult.success) {
+     // 校验失败 → 返回明确错误
+     console.error('LLM output validation failed:', validationResult.error);
+     return NextResponse.json(
+       { error: '解析失败，请重试' },
+       { status: 500 }
+     );
+   }
+
+   // 校验成功 → 保存到 Supabase
+   const validData = validationResult.data;
+   // ... upsert to resume_parsing_results
+   ```
+
+4. **错误处理**:
+   - 校验失败 → 返回明确错误 → 前端弹窗提示 "解析失败，可重试"
+   - 不做复杂 "自动修复"，最多允许用户手动重试一次
+   - 记录日志（不含敏感数据）
+
 ## Phase 2: Task Breakdown
 
 **前提**: Phase 0 和 Phase 1 完成

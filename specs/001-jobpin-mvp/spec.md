@@ -125,6 +125,14 @@ Step 3：Work Type 页面
 
 Work Type 多选（可选）：part-time / full-time / internship
 
+**Work Type 编辑行为**：
+- 首次 Onboarding 流程：用户可选择多个选项，也可留空或点击 Skip 跳过
+- Next/Skip 后进入 Resume 页面（或下一步）
+- Dashboard 触发的编辑：
+  - 从 Dashboard 点 "Work Type" 模块进入编辑页
+  - 修改后点击 Save 直接返回 /dashboard
+  - 不按 Onboarding 固定顺序继续走后续页面（这是关键）
+
 Step 4：Resume 页面（上传简历并解析展示结果）
 
 引导文案：提示用户“上传后我们会自动为你解析”
@@ -153,21 +161,21 @@ Onboarding 数据保存策略：
 
 仅在用户第一次进入 Dashboard 时触发一次，采用混合方案判断：优先检查 localStorage，不存在时再查 DB 字段 `hasSeenDashboardGuide`（布尔值）
 
-引导方式：高亮说明几个主要区域，例如：
+引导方式：使用模态框浮层 + 半透明遮罩，高亮说明主要区域：
 
-「这里是总结（Resume Summary）」
+「这里是总结 - 你的简历核心亮点」
 
-「这里是工作经历（Experiences）」
+「这里是工作经历 - 展示你的职业历程」
 
-「这里是订阅状态（Subscription）」
+「这里是订阅状态 - 管理你的会员计划」
 
-每一步高亮提示需有一个类似 “OK / Next” 的按钮推进
+每一步高亮提示需有一个 "OK / Next" 按钮推进
+
+交互实现：使用 shadcn/ui Dialog 组件 + 自定义遮罩层；用户点击遮罩可退出引导并返回 Dashboard
 
 高亮说明主要区域完成后：
 
-以同样高亮方式引导用户点击 “Upgrade / Subscribe” 按钮
-
-点击后跳转到 Stripe 订阅流程（Checkout）
+以同样高亮方式引导用户点击 "Upgrade / Subscribe" 按钮，点击后跳转到 Stripe 订阅流程（Checkout）
 
 D） Dashboard（完成 Onboarding 后进入的主页面）
 
@@ -177,13 +185,23 @@ Dashboard 至少包含以下区域：
 
 显示用户姓名（来自 Clerk）
 
-Profile 完成度进度条（至少基于：
+Profile 完成度进度条（基于以下权重计算）：
 
-Profile（RoleName/First/Last）是否完成
+- Profile 信息（RoleName + First Name + Last Name）：40%
+  - RoleName 完成: 15%
+  - First Name 完成: 15%
+  - Last Name 完成: 10%
 
-Resume 是否已完成解析
+- Resume 解析完成：40%
 
-订阅是否 active）
+- 订阅激活（Subscription active）：20%
+
+计算公式：
+```
+完成度 = (role_name ? 15 : 0) + (first_name ? 15 : 0) + (last_name ? 10 : 0) + (resume_parsed ? 40 : 0) + (subscription_active ? 20 : 0)
+```
+
+进度条视觉表现：0-49% 显示红色，50-99% 显示黄色，100% 显示绿色
 
 Onboarding 步骤区（显示 4 个部分 + 完成状态 + 可跳转编辑）
 
@@ -473,19 +491,30 @@ Resume 页面：
 
 用户取消选择文件 / 上传取消：
 
-弹出对话框提示 “上传已取消/未选择文件”，允许重新上传
+弹出对话框提示 "上传已取消/未选择文件"，允许重新上传
 
 上传到应用服务端失败：
 
-弹出对话框提示 “上传失败”，提供重试
+弹出对话框提示 "上传失败"，提供重试
 
 外部 PDF 解析接口失败 / 超时：
 
-弹出对话框提示 “解析服务不可用/解析失败”，提供重试
+弹出对话框提示 "解析服务不可用/解析失败"，提供重试
 
 LLM 整理失败 / 输出非 JSON：
 
-弹出对话框提示 “整理失败，请重试”，并记录日志（不展示敏感信息）
+弹出对话框提示 "整理失败，请重试"，并记录日志（不展示敏感信息）
+
+**错误对话框实现要求**：
+- 必须覆盖的场景：
+  - 上传失败 / 用户取消
+  - 解析失败 / LLM 整理失败
+  - 网络错误 / 权限错误（未登录/无权限）
+- 弹窗内容最低要求：
+  - 简短原因 + 建议操作（重试/关闭）
+  - 重试按钮重新触发上传/解析
+- UI 实现方式不限：
+  - 原生 alert / 简单 modal / shadcn/ui Dialog 均可（避免引入额外 UI 库）
 
 解析成功但字段缺失：
 
@@ -511,7 +540,14 @@ Dashboard 展示订阅计划、下次扣款日期、Portal 链接
 
 支付失败/取消：仍为 Free，可重试
 
-webhook 延迟/未同步（Pending）：Dashboard 提示 Subscription syncing... / Pending activation
+webhook 延迟/未同步（Pending）：
+- Dashboard 提示 "Subscription syncing..." / "Pending activation"
+- Pending 状态触发条件：Checkout 成功后，但 webhook 尚未把订阅标记为 active
+- Pending 状态结束：
+  - webhook 更新后自动变为 active
+  - 用户可以点击 "刷新状态" 按钮重新获取订阅状态（推荐）
+  - 超时阈值（可选）：超过 3-5 分钟仍 Pending，提示用户稍后刷新或进入 Portal 查看
+- 实现方式：不强制定死轮询；可手动刷新或页面重新加载时自动检查
 
 取消订阅/切换 plan：通过 Portal 完成后，webhook 同步到系统并更新展示
 

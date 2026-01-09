@@ -212,6 +212,86 @@ USING (true);
 
 ---
 
+## Business Field Mapping (spec.md ↔ Database)
+
+本文节明确 `spec.md` 中定义的所有业务字段在数据库中的存储位置、类型和写入时机。
+
+### Profile & Onboarding 数据 (`user_profiles` 表)
+
+| spec.md 业务字段 | 数据库列 | 类型 | 必填 | 存储位置 | 写入时机 |
+|-----------------|----------|------|------|----------|----------|
+| RoleName / Profile Name | `role_name` | VARCHAR(100) | ✅ Onboarding 完成时必填 | Supabase DB | Onboarding Step 1 保存时 |
+| First Name | `first_name` | VARCHAR(100) | ✅ Onboarding 完成时必填 | Supabase DB | Onboarding Step 2 保存时 |
+| Last Name | `last_name` | VARCHAR(100) | ✅ Onboarding 完成时必填 | Supabase DB | Onboarding Step 2 保存时 |
+| Country | `country` | VARCHAR(100) | ❌ 可选 | Supabase DB | Onboarding Step 2 保存时 |
+| City | `city` | VARCHAR(100) | ❌ 可选 | Supabase DB | Onboarding Step 2 保存时 |
+| Work Type (多选) | `work_types` | TEXT[] | ❌ 可选 | Supabase DB | Onboarding Step 3 保存时；Dashboard 编辑时 |
+| Onboarding 完成状态 | `onboarding_completed` | BOOLEAN | ✅ | Supabase DB | Onboarding Step 4 完成时设为 true |
+| Dashboard 引导标记 | `has_seen_dashboard_guide` | BOOLEAN | ✅ | Supabase DB + localStorage | 首次进入 Dashboard 完成引导后 |
+| 用户 ID (Clerk) | `clerk_user_id` | VARCHAR(255) UNIQUE | ✅ | Supabase DB | 用户首次访问时创建 |
+
+**说明**:
+- Work Type 可在 Dashboard 编辑：从 Dashboard 点击 "Work Type" 模块进入，修改后 Save 直接返回 /dashboard
+- `has_seen_dashboard_guide` 使用混合方案：优先检查 localStorage，不存在时再查 DB
+
+### Resume 解析数据 (`resume_parsing_results` 表)
+
+| spec.md 业务字段 | 数据库列 | 类型 | 必填 | 存储位置 | 写入时机 |
+|-----------------|----------|------|------|----------|----------|
+| fullName | `full_name` | TEXT | ❌ | Supabase DB | Resume 解析成功后（upsert） |
+| email | `email` | TEXT | ❌ | Supabase DB | Resume 解析成功后（upsert） |
+| phone | `phone` | TEXT | ❌ | Supabase DB | Resume 解析成功后（upsert） |
+| skills | `skills` | JSONB | ❌（默认空数组） | Supabase DB | Resume 解析成功后（upsert） |
+| experiences | `experiences` | JSONB | ❌（默认空数组） | Supabase DB | Resume 解析成功后（upsert） |
+| resumeSummary | `resume_summary` | TEXT | ❌ | Supabase DB | Resume 解析成功后（upsert） |
+
+**experiences 数组结构** (JSONB):
+```json
+[
+  {
+    "company": "string",
+    "title": "string",
+    "start": "string",    // startDate（如 "2020-01"）
+    "end": "string",      // endDate（可选，如 "2023-12"）
+    "summary": "string"   // 可选
+  }
+]
+```
+
+**说明**:
+- 每用户仅保留 1 份解析结果，重新上传时覆盖（upsert）
+- 不保存 PDF 文件本体，仅保存结构化解析结果
+
+### Subscription 数据 (`subscriptions` 表)
+
+| spec.md 业务字段 | 数据库列 | 类型 | 必填 | 存储位置 | 写入时机 |
+|-----------------|----------|------|------|----------|----------|
+| 订阅计划 | `plan` | VARCHAR(50) | ❌（默认 'free'） | Supabase DB | Webhook `checkout.session.completed` 时写入/更新 |
+| 订阅激活状态 | `active` | BOOLEAN | ✅（默认 false） | Supabase DB | Webhook `checkout.session.completed` / `customer.subscription.updated` / `deleted` |
+| 下次扣款日期 | `next_billing_date` | TIMESTAMPTZ | ❌ | Supabase DB | Webhook `checkout.session.completed` / `customer.subscription.updated` |
+| Stripe Customer ID | `stripe_customer_id` | VARCHAR(255) UNIQUE | ❌ | Supabase DB | Webhook `checkout.session.completed` 时写入 |
+| Stripe Subscription ID | `stripe_subscription_id` | VARCHAR(255) UNIQUE | ❌ | Supabase DB | Webhook `checkout.session.completed` 时写入 |
+| 用户 ID (Clerk) | `clerk_user_id` | VARCHAR(255) UNIQUE | ✅ | Supabase DB | Webhook 从 `metadata.clerk_user_id` 提取 |
+
+**说明**:
+- 所有订阅数据由 Stripe webhook 写入/更新
+- Dashboard 通过查询 `subscriptions` 表展示订阅状态
+- Pending 状态：Checkout 成功但 webhook 尚未到达时，订阅记录可能不存在或 `active=false`
+
+### Dashboard 派生计算字段
+
+| spec.md 业务字段 | 计算方式 | 存储位置 | 更新时机 |
+|-----------------|----------|----------|----------|
+| Profile 完成度进度条 | `(role_name ? 15 : 0) + (first_name ? 15 : 0) + (last_name ? 10 : 0) + (resume_parsed ? 40 : 0) + (subscription_active ? 20 : 0)` | 实时计算（不存储） | Dashboard 加载时计算 |
+| Onboarding 模块完成状态 | 检查对应字段是否存在 | 实时计算（不存储） | Dashboard 加载时计算 |
+| 用户姓名显示 | 来自 Clerk | 派生（不存储） | Dashboard 加载时从 Clerk 获取 |
+
+**说明**:
+- 进度条权重：RoleName 15%, First Name 15%, Last Name 10%, Resume 40%, Subscription 20%
+- 视觉表现：0-49% 红色，50-99% 黄色，100% 绿色
+
+---
+
 ## Relationships
 
 ```

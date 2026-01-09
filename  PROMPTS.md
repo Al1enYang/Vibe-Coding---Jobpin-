@@ -1,5 +1,5 @@
-1. 初次梳理
-# 1.1 Prompt
+1. 梳理和页面结构
+# 1.1 梳理文档
 @README.md 我生成好了一个我自己版本的README.md 文档,其中要开发这个项目的话你认为我的项目结构清晰吗?是否需要补充或修改? 
 
 # 1.1 Output
@@ -98,7 +98,7 @@
   6. 开发规范提醒
   7. 常见问题 FAQ（如 webhook 延迟怎么调试）
 
-# 1.2 Prompt
+# 1.2 梳理文档
 @CLAUDE.md 我生成好了一个我自己版本的CLAUDE.md 文档,其中要开发这个项目的话你认为我的内容或结构上描述清晰吗?是否需要补充或修改? 
 
 # 1.2 Output
@@ -228,7 +228,7 @@
 
   补充完 P0 + P1 内容后，这将成为一个非常完整的 AI Agent 入口文档！
 
- # 1.3 Prompt
+ # 1.3 更改规定
  P0的两条可以修改。P1-3我建议不写死表名:
   Supabase：存三类数据（Onboarding/Profile、Resume 解析结果、Subscription 状态）；具体 schema/表名以 README 为准。                                             
   P1-4可以修改.P1-5可以修改但不要写成强制实现细节:在首次判断语句后面加上(已实现便利为准).P2的第6和第7点先不需要修改. 
@@ -258,7 +258,7 @@
   ---
   现在的 CLAUDE.md 已经非常完整且灵活，既明确了关键信息（middleware、编辑返回逻辑、环境变量前置），又避免了过度限定实现细节（数据库表名、首次判断方式）。这样的文档既能引导 AI Agent 快速理解项目，又保留了实现的灵活性！
 
-# 1.4 Prompt
+# 1.4 梳理需求
   请先阅读以下项目文档：
 - .specify/memory/constitution.md（协作宪法，最高优先级）
 - spec.md（产品规格）
@@ -421,7 +421,7 @@
   - /onboarding/work-type
   - /onboarding/resume
 
-  # 1.5 Prompt
+  # 1.5 梳理需求
   Q1:需要根据 spec.md 的字段要求自行设计表结构并提供迁移脚本,需要补充的resume_parsed 表里的需要有一个上传状态来记录用户是否上传,上传状态需要在dashboard的"上传简历"区块显示,另外技能列表skills存储的数据需要用简单用逗号分隔或从文本中用关键词匹配,工作经历experiences存储的数据需要包括公司名 + 职位名 + 时间范围；哪怕只识别 1–2 段.                                                                   
   Q2:DB                                                                      
   Q3:pdf 的解析可以给你一个接口，调用案例参考：根目录下的example.py 文件,需要用到的api_key 是 sk-8ctP0KRe3MOjs8EHOurwvkjb7iWgyVrLOIyGqH2RwQlMQYC9,它解析出来的是pdf原始数据，没有可读性，接个大模型的api整理一下即可,然后大模型的api调用案例你可以参考根目录下的llm_example.py 文件,api_key 是一样的.你阅读完参考文件后要还有疑问的话再问我
@@ -431,7 +431,7 @@
   # 1.5 Output
   好的，我已经理解了 API 调用方式。现在让我先检查当前的项目结构，然后按照 constitution.md 的要求创建 plan.md 和 tasks.md。
 
-  # 1.6 Prompt
+  # 1.6 生成页面原型
   根据项目需求以HTML形式输出最终界面展示效果
 
   # 1.6 Output
@@ -443,7 +443,7 @@
   3. Onboarding 4 步（Role → Profile → Work Type → Resume）
   4. Dashboard（含首次引导高亮效果）
 
-  # 1.7 Prompt
+  # 1.7 更改原型页面
   要更改的部分：
   1.在sign up 界面没有体现发送邮箱验证码的功能
   2.Onboarding-Profile 页面的country输入框应该是下拉框配合字符猜想的形式
@@ -451,3 +451,343 @@
   4.Onboarding-Resume的解析结果还应该包含Experiences：列表（公司、职位、起止时间、简要描述）
   5.从dashboard里点击4个onboarding的其中一个step跳转到编辑页面后仍然可以前后点击next或back而不是只有save按键保存并跳转会dashboard                                                     
   6.用户第一次进到dashboard时应该强制高亮引导用户dashboard的特性,引导过程缺少next按钮推荐引导过程
+
+  # 1.8 更改原型页面
+  1.验证邮箱不需要单独创建一个页面,只需要再confirm password 下面同一个表单中加一行email verification的输入框,输入框右边有一个发送按钮,用户在输入完正确的邮箱格式后点击发送按钮,将收到的验证码输入进新创建的输入框里就可以了                                                                  
+  2.进入dashboard后用户想修改自己的profile,点击profile部分的任何一个步骤(例如role)进入编辑页除了编辑功能只有两个按钮,back和save,点击back回到dashboard,点击save保存记录回到dashboard  
+
+  # 1.9 澄清疑惑
+  /speckit.clarify
+
+  # 2 计划
+  /speckit.plan
+
+  # 2.1 调整接口
+  简历解析实现方法我给你一个接口,调用案例参考example.py,调用该接口解析出来的是pdf 原始数据，没有可读性，接个大模型的api(参考llm_examply.py)整理一下即可,需要的话我可以提供apikey
+
+  # 2.1 Output
+  明白了!你已经有了完整的 DMXAPI 接口解决方案:
+
+  1. PDF 解析接口 (example.py): https://www.dmxapi.cn/v1/responses (模型: hehe-tywd)
+  2. LLM 整理接口 (llm_example.py): https://www.dmxapi.cn/v1/chat/completions (模型: gpt-5-mini)
+
+  这比我之前研究的方案更好!让我更新相关文档
+
+  # 2.2 设定配置
+  我有一些开发上的要求,你帮我更新一下相关文件:
+  登录 / 注册（Clerk）部分要求:
+  1.使用 Clerk 的 Next.js 集成(2点)：
+  在 app/layout.tsx 中配置 <ClerkProvider>；
+  使用 Clerk 提供的 <SignIn />、<SignUp /> 或相应的路由组件
+
+  # 2.2 Output
+  更新内容汇总
+
+  1. spec.md - 功能规格
+  - ✅ 添加了 Clerk 集成实现要求
+  - ✅ 包含 <ClerkProvider> 配置代码示例
+  - ✅ 包含 <SignIn /> 和 <SignUp /> 组件使用说明
+  - ✅ 明确了邮箱验证码逻辑的要求
+
+  2. plan.md - 实施计划
+  - ✅ 添加了 axios 依赖(用于 DMXAPI 调用)
+  - ✅ 添加了完整的 Clerk 集成实施细节(7 个步骤):
+    a. 安装 Clerk 依赖
+    b. 配置环境变量
+    c. 配置 ClerkProvider (layout.tsx)
+    d. 创建登录页面
+    e. 创建注册页面
+    f. 配置路由保护中间件
+    g. 启用邮箱验证
+
+  3. quickstart.md - 快速开始指南
+  - ✅ 添加了 Step 4.5: Configure Clerk Authentication
+  - ✅ 包含 7 个子步骤,每个步骤都有详细说明和代码示例
+  - ✅ 包含 Clerk Dashboard 配置步骤
+  - ✅ 包含 Google OAuth 配置说明
+
+  📋 Clerk 集成关键点
+
+  必须实现的组件:
+  // 1. app/layout.tsx - ClerkProvider
+  // 2. app/(auth)/sign-in/page.tsx - SignIn 组件
+  // 3. app/(auth)/sign-up/page.tsx - SignUp 组件
+  // 4. middleware.ts - 路由保护
+
+  邮箱验证要求:
+  - ✅ 用户注册后必须验证邮箱
+  - ✅ 使用 Clerk 默认行为即可
+  - ✅ 在 Clerk Dashboard 中启用 Email verification
+
+  # 2.3 生成 Next.js + Clerk 基础结构
+  文档里是否有包括在 /web 路径下生成 Next.js + Clerk 基础结构
+
+  # 2.3 Output
+  文档已完整更新!
+
+  现在 quickstart.md 包含了从零开始创建 Next.js + Clerk 项目的完整流程:
+
+  📋 完整步骤列表
+  ┌────────┬─────────────────────────────────┬─────────────────────────────────────────┐
+  │  步骤  │              内容               │                  说明                   │
+  ├────────┼─────────────────────────────────┼─────────────────────────────────────────┤
+  │ Step 1 │ Create Next.js Project          │ ✅ 新增 - 使用 create-next-app 创建项目 │
+  ├────────┼─────────────────────────────────┼─────────────────────────────────────────┤
+  │ Step 2 │ Clone and Install               │ 如果已有仓库,直接安装                   │
+  ├────────┼─────────────────────────────────┼─────────────────────────────────────────┤
+  │ Step 3 │ Configure Environment Variables │ 配置所有环境变量                        │
+  ├────────┼─────────────────────────────────┼─────────────────────────────────────────┤
+  │ Step 4 │ Set Up Supabase Database        │ 创建数据库表和 RLS 策略                 │
+  ├────────┼─────────────────────────────────┼─────────────────────────────────────────┤
+  │ Step 5 │ Initialize shadcn/ui            │ 安装 UI 组件库                          │
+  ├────────┼─────────────────────────────────┼─────────────────────────────────────────┤
+  │ Step 6 │ Configure Clerk Authentication  │ ✅ 详细 - 7 个子步骤包含完整代码        │
+  ├────────┼─────────────────────────────────┼─────────────────────────────────────────┤
+  │ Step 7 │ Start Development Server        │ 启动本地开发环境                        │
+  ├────────┼─────────────────────────────────┼─────────────────────────────────────────┤
+  │ Step 8 │ Test Stripe Webhooks Locally    │ 使用 Stripe CLI 测试                    │
+  ├────────┼─────────────────────────────────┼─────────────────────────────────────────┤
+  │ Step 9 │ Verify Setup                    │ 验证所有配置是否正确                    │
+  └────────┴─────────────────────────────────┴─────────────────────────────────────────┘
+  🎯 Step 1 新增内容
+
+  创建 Next.js 项目:
+  npx create-next-app@latest web --typescript --tailwind --app --no-src-dir --import-alias "@/*"
+
+  安装所有依赖:
+  npm install @clerk/nextjs @supabase/supabase-js stripe react-hook-form zod axios
+  npm install class-variance-authority clsx tailwind-merge
+
+  创建后的目录结构:
+  web/
+  ├── app/                    # App Router 页面
+  │   ├── layout.tsx         # 根布局
+  │   ├── page.tsx           # 首页 (/)
+  │   └── globals.css        # 全局样式
+  ├── public/                # 静态资源
+  ├── package.json
+  └── ...
+
+  🎯 Step 6 Clerk 集成(7个子步骤)
+
+  包含完整的代码示例:
+  1. 安装 Clerk 依赖
+  2. 配置 ClerkProvider (layout.tsx)
+  3. 创建登录页面
+  4. 创建注册页面
+  5. 配置路由保护中间件
+  6. 在 Clerk Dashboard 中启用邮箱验证
+  7. 配置 Google OAuth (可选)
+
+  # 2.4 核查
+  只做规划，不要修改任何文件，也不要运行会改变项目状态的命令,检查计划是否包括以下内容:
+  1. 需要修改的文件或模块清单
+  2. 按依赖顺序排列的实现步骤
+  3. 需要新增或修改的数据结构与接口
+  4. 必须覆盖的边界条件（空、错、慢、无权限）
+  5. 测试与验证步骤（具体命令或检查路径）
+  6. 风险点与回滚方案
+  等我确认计划后，你再进入执行并按计划逐步实现 
+
+  # 2.4 Output
+  当前计划文档适合作为设计文档，但作为实施计划还需要补充：
+
+  1. 添加实施步骤章节 (按依赖顺序)
+  2. 添加边界条件总结 (从 spec.md 提取)
+  3. 添加验证步骤章节 (具体命令 + 检查清单)
+  4. 添加风险与回滚章节 (风险识别 + 应对方案)
+
+  # 2.4 Continue
+  添加的内容
+
+  1. 实施步骤
+
+  - 前置准备 (创建项目 + 安装依赖)
+  - 环境配置 (.env.local 配置)
+  - 数据库初始化 (执行迁移脚本)
+  - Clerk 集成 (布局 + 页面 + 中间件)
+  - 核心功能开发 (Onboarding + Dashboard + API)
+  - Stripe 订阅配置 (Checkout + Webhook)
+
+  每个步骤包含 命令 + 检查点
+
+  2. 边界条件
+
+  使用表格汇总 10 个场景,统一写"重定向到 /sign-in (或 Clerk 托管页)",未出现 401
+
+  3. 风险缓解
+
+  列出 8 种风险,每种包含 缓解措施 + 回滚方案:
+  - 密钥泄露 (2 条,其中包含 .env.local 文件生成规则)
+  - DMXAPI 服务不可用
+  - Stripe Webhook 丢失
+  - Supabase RLS 配置错误
+  - 等
+
+  4. 修改文件清单
+
+  独立章节,包含:
+  - 需要创建的文件树 (约 25-30 个)
+  - 需要修改的文件 (3 个)
+  - 文件数量统计
+
+  5. 测试验证
+
+  包含具体命令 + 检查清单:
+  - 自动化验证 (typecheck, lint, build)
+  - 手动验证清单 (认证 / Onboarding / Dashboard / 订阅 / 异常)
+  - 性能验证 (Lighthouse)
+  - 本地开发验证 (Stripe CLI)
+
+  # 2.5 plan检查确认
+  还有什么需要向我确认和建议的吗
+
+  # 2.5 Output
+  需要确认的问题
+
+  1. spec.md 中的超时重试描述需要同步更新
+
+  发现 不一致: spec.md 第 266 行仍写 "自动重试一次"，但 plan.md 已改为"仅手动重试"。
+
+  当前 spec.md (第 260-270 行):
+  超时与重试策略：
+  每个外部 API 调用（PDF 解析、LLM 整理）设置 60 秒超时
+  发生超时或 5xx 错误时，自动重试一次
+  两次尝试均失败后，向前端返回错误并提示用户手动重试
+
+  当前 plan.md (第 37-39 行):
+  简历解析外部调用: 60 秒超时,失败显示错误提示,允许用户手动重试
+
+  建议: 是否需要更新 spec.md 第 266 行，改为 "不自动重试，直接显示错误提示，允许用户手动重试"？
+
+  ---
+  2. quickstart.md 中的 shadcn/ui 标注
+
+  当前: "Step 5: Initialize shadcn/ui"
+
+  建议: 改为 "Step 5: Initialize shadcn/ui (可选)" 或添加说明 "如果选择使用 shadcn/ui，执行以下步骤；否则可跳过此步骤"
+
+  # 2.5 Continue
+  1.需要更新 spec.md 第 266 行，改为 "不自动重试，直接显示错误提示，允许用户手动重试“
+  2.修改说明为"Step 5: Initialize shadcn/ui(本项目采用shadcn/ui)
+  修改完让我审核 plan.md 
+
+  # 2.5 Output
+  文档一致性检查 ✅
+  ┌───────────────┬────────────────────────────────────┬──────────────────────┬──────┐
+  │     文档      │            超时重试策略               │    shadcn/ui 说明    │ 状态 │
+  ├───────────────┼────────────────────────────────────┼──────────────────────┼──────┤
+  │ spec.md       │ 不自动重试，显示错误提示               │ -                    │ ✅   │
+  ├───────────────┼────────────────────────────────────┼──────────────────────┼──────┤
+  │ plan.md       │ 失败显示错误提示，允许用户手动重试       │ UI 组件库(可选)        │ ✅   │
+  ├───────────────┼────────────────────────────────────┼──────────────────────┼──────┤
+  │ quickstart.md │ -                                  │ 本项目采用 shadcn/ui   │ ✅   │
+  ├───────────────┼────────────────────────────────────┼──────────────────────┼──────┤
+  │ research.md   │ -                                  │ RSC 支持、可定制性强    │ ✅   │
+  └───────────────┴────────────────────────────────────┴──────────────────────┴──────┘
+  ---
+  待审核文件
+
+  现在您可以审核 plan.md，它包含：
+
+  1. ✅ Constitution Check
+  2. ✅ Project Structure
+  3. ✅ Phase 0/1/2 描述
+  4. ✅ Clerk 集成实施细节 (7 步)
+  5. ✅ 实施步骤 (新增 - 6 个阶段 + 检查点)
+  6. ✅ 边界条件 (新增 - 10 个场景表格)
+  7. ✅ 风险缓解 (新增 - 8 种风险 + 回滚方案)
+  8. ✅ 修改文件清单 (新增 - 文件树 + 统计)
+  9. ✅ 测试验证 (新增 - 自动化 + 手动清单)
+
+  plan.md 完整目录
+
+  1. Summary (项目概述)
+  2. Technical Context (技术栈 + 性能目标 + 约束)
+  3. Constitution Check (宪法合规检查)
+  4. Project Structure (文档与源码结构)
+  5. Complexity Tracking (复杂度追踪)
+  6. Phase 0: Research & Technical Decisions
+  7. Phase 1: Design & Contracts
+     └─ Clerk 集成实施细节 (7 步)
+  8. Phase 2: Task Breakdown
+  9. 实施步骤 (6 个阶段: 前置准备 → 环境配置 → 数据库 → Clerk → 核心功能 → Stripe)
+  10. 边界条件 (10 个场景表格)
+  11. 风险缓解 (8 种风险 + 回滚方案)
+  12. 修改文件清单 (新建/修改文件树 + 统计)
+  13. 测试验证 (自动化 + 手动清单 + 性能 + 本地开发)
+  14. Next Steps
+
+  # 2.6 key的处理
+  帮我检查看看plan.md文档里是否有说明 "若使用外部 Resume Parser / LLM，需要说明怎么配置 key" 的处理方式?
+
+  # 2.6 Output
+  检查结果：plan.md 中没有详细说明 DMXAPI key 的配置方式。
+
+  现状分析：
+  - plan.md 第 348 行仅简单列举："Clerk, Supabase, DMXAPI, Stripe keys"
+  - 缺少：环境变量名称、从哪里获取、具体配置步骤
+
+  对比 quickstart.md 中有完整的环境变量配置：
+
+  # quickstart.md 第 128-133 行有详细说明
+  DMXAPI_API_KEY=sk-...
+  DMXAPI_PDF_MODEL=hehe-tywd
+  DMXAPI_LLM_MODEL=gpt-5-mini
+
+  ---
+  建议：是否需要在 plan.md 的"环境配置"或"实施步骤"章节中补充 DMXAPI key 的配置说明？
+
+  我可以添加类似这样的内容：
+
+  ### 环境配置
+
+  # 创建 .env.local 文件,配置以下变量(从各服务 Dashboard 获取)
+  # - Clerk: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY, CLERK_SECRET_KEY
+  # - Supabase: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+  # - DMXAPI: DMXAPI_API_KEY, DMXAPI_PDF_MODEL, DMXAPI_LLM_MODEL
+  # - Stripe: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
+
+  或者添加一个环境变量清单表格。需要我补充吗？
+
+  # 2.7 环境配置说明
+  这是我提供的环境配置说明,你可以添加至plan.md 的"环境配置”：    
+  ### 环境配置（web/.env.local） 
+  在 `web/` 目录创建 `.env.local`，从各服务 Dashboard 获取并配置以下变量。
+  注意：所有 key 只能存在于本地 `.env.local` 或部署平台环境变量中，禁止写入代码/README 真实值，禁止提交到 Git
+  - Clerk（必填）
+  -NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY                                                      -CLERK_SECRET_KEY
+  - Supabase（必填）
+  -NEXT_PUBLIC_SUPABASE_URL
+  -NEXT_PUBLIC_SUPABASE_ANON_KEY
+  - （可选）SUPABASE_SERVICE_ROLE_KEY：仅在需要服务端以管理员权限写入/管理时启用，默认不要求
+  - DMXAPI（必填/可选）
+  - DMXAPI_API_KEY（必填：服务端调用 PDF 解析与 LLM 整理）
+  - （可选）DMXAPI_PDF_MODEL：如需指定模型名则配置；不配则使用默认/示例值 
+  - （可选）DMXAPI_LLM_MODEL：同上
+  - Stripe（必填）
+  -STRIPE_SECRET_KEY
+  -STRIPE_WEBHOOK_SECRET
+  -NEXT_PUBLIC_STRIPE_PRICE_ID
+  - APP_URL
+
+  # 2.7 Output
+  plan.md 现已完整，包含 DMXAPI key 配置说明。可以继续审核或直接通过。
+
+  # 2.8 创建checklist
+  /speckit.checklist
+
+  # 2.9 更改checklist
+  将GATING项目设置为CHK001（秘密和无曝光）、CHK002（Stripe webhook签名验证+允许列表事件）、CHK006（受保护的路由一致性）。
+  将CHK004/CHK005/CHK007降级为标准检查（MVP级别）。 将CHK003合并到CHK001中，以避免重复。 代码测试不需要完整的威胁模型文档；只需要轻量级的风险说明+缓解措施。
+
+  # 3 tasks生成
+  /speckit.tasks
+
+  # 3.1 更正
+  我的项目不考虑上线目前,建议：把所有 “Production-ready / Release gate” 改成:
+  • “Code-test ready / Demo-ready / MVP-ready”
+  • “Webhook & error handling complete (MVP-level)”
+
+  # 3.1 Output
+  已将所有 "生产就绪/发布门控" 相关表述修改为 "代码测试就绪/Demo 就绪/MVP 就绪
