@@ -1,0 +1,292 @@
+# Stripe Webhook Events Contract
+
+**Feature**: 001-jobpin-mvp
+**Version**: 1.0.0
+**Date**: 2026-01-09
+
+## Overview
+
+本文档定义了 Stripe Webhook 事件的处理契约,包括事件类型、数据结构和数据库操作。
+
+---
+
+## Webhook Endpoint
+
+**URL**: `POST /api/stripe/webhook`
+
+**Headers**:
+```
+Content-Type: application/json
+stripe-signature: <signature>
+```
+
+**Security**: 必须验证 Stripe 签名,拒绝无效签名
+
+---
+
+## Event Types
+
+### 1. checkout.session.completed
+
+**Trigger**: 用户在 Stripe Checkout 完成支付流程
+
+**Payload Structure**:
+```json
+{
+  "id": "evt_1234567890",
+  "type": "checkout.session.completed",
+  "data": {
+    "object": {
+      "id": "cs_1234567890",
+      "customer": "cus_1234567890",
+      "subscription": "sub_1234567890",
+      "metadata": {
+        "clerk_user_id": "user_1234567890"
+      },
+      "status": "complete"
+    }
+  }
+}
+```
+
+**Database Operations**:
+```sql
+INSERT INTO subscriptions (
+  clerk_user_id,
+  stripe_customer_id,
+  stripe_subscription_id,
+  plan,
+  active,
+  next_billing_date
+) VALUES (
+  'user_1234567890',  -- from metadata.clerk_user_id
+  'cus_1234567890',    -- from customer
+  'sub_1234567890',    -- from subscription
+  'pro',               -- hardcoded for MVP
+  true,                -- active = true
+  NOW() + INTERVAL '1 month'  -- calculated from subscription
+)
+ON CONFLICT (clerk_user_id)
+DO UPDATE SET
+  stripe_customer_id = EXCLUDED.stripe_customer_id,
+  stripe_subscription_id = EXCLUDED.stripe_subscription_id,
+  plan = EXCLUDED.plan,
+  active = EXCLUDED.active,
+  next_billing_date = EXCLUDED.next_billing_date,
+  updated_at = NOW();
+```
+
+**Response**: `200 OK` with body `"OK"`
+
+**Error Handling**:
+- 缺少 `metadata.clerk_user_id`: 返回 400,记录错误日志
+- Supabase 插入失败: 返回 500,记录错误日志
+
+---
+
+### 2. customer.subscription.updated
+
+**Trigger**: 用户在 Customer Portal 更新订阅(如切换 plan)
+
+**Payload Structure**:
+```json
+{
+  "id": "evt_1234567890",
+  "type": "customer.subscription.updated",
+  "data": {
+    "object": {
+      "id": "sub_1234567890",
+      "customer": "cus_1234567890",
+      "status": "active",
+      "current_period_end": 1234567890,
+      "items": {
+        "data": [
+          {
+            "price": {
+              "id": "price_1234567890",
+              "nickname": "Pro Plan"
+            }
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+**Database Operations**:
+```sql
+UPDATE subscriptions
+SET
+  active = (status = 'active' OR status = 'trialing'),
+  plan = CASE
+    WHEN status = 'active' OR status = 'trialing' THEN 'pro'
+    ELSE 'free'
+  END,
+  next_billing_date = to_timestamp(current_period_end),
+  updated_at = NOW()
+WHERE stripe_subscription_id = 'sub_1234567890';
+```
+
+**Response**: `200 OK` with body `"OK"`
+
+**Error Handling**:
+- `stripe_subscription_id` 不存在: 记录警告日志,仍返回 200
+- Supabase 更新失败: 返回 500,记录错误日志
+
+---
+
+### 3. customer.subscription.deleted
+
+**Trigger**: 用户取消订阅
+
+**Payload Structure**:
+```json
+{
+  "id": "evt_1234567890",
+  "type": "customer.subscription.deleted",
+  "data": {
+    "object": {
+      "id": "sub_1234567890",
+      "customer": "cus_1234567890",
+      "status": "canceled"
+    }
+  }
+}
+```
+
+**Database Operations**:
+```sql
+UPDATE subscriptions
+SET
+  active = false,
+  plan = 'free',
+  updated_at = NOW()
+WHERE stripe_subscription_id = 'sub_1234567890';
+```
+
+**Response**: `200 OK` with body `"OK"`
+
+**Error Handling**:
+- `stripe_subscription_id` 不存在: 记录警告日志,仍返回 200
+- Supabase 更新失败: 返回 500,记录错误日志
+
+---
+
+## Security Requirements
+
+### Signature Verification
+
+**必须使用 Stripe 官方库验证签名**:
+
+```typescript
+import Stripe from 'stripe';
+import { headers } from 'next/headers';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+
+export async function POST(req: Request) {
+  const body = await req.text();
+  const signature = headers().get('stripe-signature')!;
+
+  let event: Stripe.Event;
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      body,
+      signature,
+      webhookSecret
+    );
+  } catch (err) {
+    console.error('Webhook signature verification failed:', err);
+    return new Response('Invalid signature', { status: 401 });
+  }
+
+  // Process event...
+}
+```
+
+**安全规则**:
+- ✅ 使用 `stripe.webhooks.constructEvent()` 验证
+- ❌ 禁止跳过签名验证
+- ❌ 禁止在日志中输出完整的 payload/body
+
+---
+
+## Error Responses
+
+| Status | Body | Description |
+|--------|------|-------------|
+| 200 | `"OK"` | Webhook processed successfully |
+| 400 | `{"error": "Invalid payload"}` | Malformed request |
+| 401 | `{"error": "Invalid signature"}` | Signature verification failed |
+| 500 | `{"error": "Internal server error"}` | Database or processing error |
+
+---
+
+## Logging Requirements
+
+**必须记录的日志**:
+- 所有接收到的 webhook 事件(仅 event.id 和 type)
+- 签名验证失败
+- 数据库操作失败(不含敏感数据)
+
+**日志格式**:
+```json
+{
+  "level": "error",
+  "event_id": "evt_1234567890",
+  "event_type": "checkout.session.completed",
+  "error": "Database connection failed"
+}
+```
+
+**禁止**:
+- ❌ 记录完整的请求 body
+- ❌ 记录 API keys 或 secrets
+- ❌ 记录用户的个人身份信息(PII)
+
+---
+
+## Idempotency
+
+Webhook 处理必须是幂等的:
+- 同一个 event.id 多次处理,结果相同
+- 使用数据库 ON CONFLICT / WHERE 条件避免重复插入
+
+**示例**:
+```sql
+-- checkout.session.completed 使用 upsert
+INSERT INTO subscriptions (...) VALUES (...)
+ON CONFLICT (clerk_user_id) DO UPDATE SET ...;
+
+-- customer.subscription.updated 使用 WHERE
+UPDATE subscriptions
+SET active = ...
+WHERE stripe_subscription_id = 'sub_1234567890';
+-- 如果不存在,影响 0 行,无副作用
+```
+
+---
+
+## Testing
+
+**本地测试**:
+使用 Stripe CLI 转发 webhook:
+
+```bash
+stripe listen --forward-to localhost:3000/api/stripe/webhook
+stripe trigger checkout.session.completed
+stripe trigger customer.subscription.updated
+stripe trigger customer.subscription.deleted
+```
+
+---
+
+## Next Steps
+
+1. ✅ Webhook 契约已定义
+2. ⏳ 在 `/api/stripe/webhook/route.ts` 中实现
+3. ⏳ 配置 Stripe Dashboard webhook URL
+4. ⏳ 本地测试使用 Stripe CLI

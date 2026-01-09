@@ -62,6 +62,30 @@ Email + Password 注册/登录
 
 Google 登录
 
+**Clerk 集成实现要求**：
+1. 在 `app/layout.tsx` 中配置 `<ClerkProvider>`:
+   ```tsx
+   import { ClerkProvider } from '@clerk/nextjs'
+
+   export default function RootLayout({ children }) {
+     return (
+       <ClerkProvider>
+         {children}
+       </ClerkProvider>
+     )
+   }
+   ```
+
+2. 使用 Clerk 提供的组件:
+   - `/sign-in` 路由使用 `<SignIn />` 组件
+   - `/sign-up` 路由使用 `<SignUp />` 组件
+   - 或使用 Clerk 的路由中间件进行自动重定向
+
+**邮箱验证码逻辑**：
+- 必须可用（由 Clerk 默认行为实现）
+- 用户注册后发送验证码到邮箱
+- 验证通过后才能完成注册
+
 校验与错误提示：
 系统需提供这些校验与错误提示（可由 Clerk 默认行为实现）
 邮箱验证码逻辑必须可用（由 Clerk 默认行为实现）。
@@ -127,7 +151,7 @@ Onboarding 数据保存策略：
 
 首次进入 Dashboard 的站内高亮引导（第一次注册用户）
 
-仅在用户第一次进入 Dashboard 时触发一次（可存 DB 或 localStorage）
+仅在用户第一次进入 Dashboard 时触发一次，采用混合方案判断：优先检查 localStorage，不存在时再查 DB 字段 `hasSeenDashboardGuide`（布尔值）
 
 引导方式：高亮说明几个主要区域，例如：
 
@@ -221,17 +245,25 @@ E） 简历上传 & 结构化解析（选项 B：外部解析 API + LLM 整理�
 
 前端上传 PDF 至应用自身的服务端接口（Next.js Route Handler，例如 POST /api/resume/parse）
 
-服务端流程：
+服务端流程（接口格式要求）：
 
 接收 PDF 文件并转为 base64（或其他接口要求格式）
 
-调用外部 PDF 解析接口获得“原始解析结果”
+调用外部 PDF 解析接口获得"原始解析结果"（接口需支持：文件上传、返回文本/markdown，超时 60 秒）
 
-将解析结果（或其中的可读文本/markdown部分）发送给大模型接口进行整理
+将解析结果（或其中的可读文本/markdown部分）发送给大模型接口进行整理（接口需支持：文本输入、结构化 JSON 输出，超时 60 秒）
 
 大模型输出严格结构化 JSON（字段见下）
 
 保存结构化 JSON 到 Supabase，并返回给前端展示
+
+注：具体服务商选择（如 PDF.co/Adobe PDF Services + OpenAI/Claude）在计划阶段确定
+
+超时与重试策略：
+
+每个外部 API 调用（PDF 解析、LLM 整理）设置 60 秒超时
+
+发生超时或 5xx 错误时，不自动重试，直接向前端返回错误并提示用户手动重试
 
 结构化输出最小字段（至少）
 
@@ -289,6 +321,12 @@ customer.subscription.updated
 
 customer.subscription.deleted
 
+Webhook 安全要求：
+
+必须使用 Stripe 官方库进行签名验证,防止伪造请求
+
+验证失败时拒绝处理并记录错误日志
+
 DB 记录（至少）：
 
 userId（Clerk）
@@ -310,6 +348,50 @@ Dashboard 提供 “Manage subscription” 链接跳转 Portal
 用户可在 Portal 中取消订阅 / 切换 plan（不要求在应用内实现完整 UI）
 
 Dashboard 订阅区需根据订阅状态展示对应信息（Free/Pro、下次扣款日期、Portal 入口）
+
+3.2 数据模型需求（业务字段，具体表结构在计划阶段设计）
+
+Onboarding 相关数据需求：
+- 用户标识：与 Clerk userId 关联
+- RoleName（Profile Name）：字符串，必填
+- Profile 信息：
+  - First Name：字符串，必填
+  - Last Name：字符串，必填
+  - Country：字符串，可选
+  - City：字符串，可选
+- Work Type：多选字符串数组（part-time / full-time / internship），可选
+- Onboarding 完成状态：至少需记录 RoleName、First Name、Last Name、Resume 解析是否完成
+- Dashboard 引导标记：hasSeenDashboardGuide（布尔值）
+
+简历解析结果数据需求（每用户仅保留 1 份）：
+- fullName（string）
+- email（string）
+- phone（string）
+- skills（string[]，可为空）
+- experiences（数组，每项包含 company/title/start/end/summary）
+- resumeSummary（string）
+
+订阅数据需求：
+- userId（Clerk 用户 ID）
+- stripeCustomerId（Stripe 客户 ID）
+- stripeSubscriptionId（Stripe 订阅 ID）
+- plan（订阅计划标识，如 "pro"）
+- active（布尔值，订阅是否激活）
+- nextBillingDate（下次扣款日期）
+
+3.3 非功能质量属性
+
+性能目标：
+- 页面首次加载：<3 秒（LCP 目标）
+- API 响应时间：<2 秒（不含外部 PDF 解析和 LLM 处理时间）
+- 简历解析外部调用：每次 60 秒超时（已在实现方案中定义）
+
+可观测性要求：
+- 日志记录范围：
+  - 所有错误（Error 级别）
+  - 关键业务流程：用户注册、Onboarding 完成、简历解析成功/失败、订阅状态变更
+- 日志内容：至少包含 userId、操作类型、成功/失败状态、关键错误信息（不含敏感数据）
+- 不要求实时监控或告警系统（MVP 阶段）
 
 4. 核心流程与异常处理（必须写清）
 4.1 访问与路由保护流程
@@ -473,3 +555,14 @@ Dashboard 正确展示 Free/Pro、下次扣款日期、Portal link
 webhook 延迟时 Dashboard 有 Pending 提示
 
 Portal 可用于取消订阅/切换 plan，且系统状态可通过 webhook 同步更新展示
+
+## Clarifications
+
+### Session 2026-01-09
+
+- Q: PDF 解析和 LLM 处理的超时/重试策略是什么？ → A: 每次 API 调用 60 秒超时，超时/5xx 错误时不自动重试，直接显示错误提示，允许用户手动重试
+- Q: 首次进入 Dashboard 的站内高亮引导,应该使用什么方式来判断"首次"？ → A: 混合方案 - 优先检查 localStorage，不存在时再查 DB，平衡性能与可靠性
+- Q: 用于简历解析的外部 PDF 解析 API 和 LLM API 应该选择什么服务？ → A: 仅规定接口格式,具体实现在计划阶段确定,保持灵活性
+- Q: Supabase 数据库表结构应该如何在规格中定义？ → A: 仅列出业务字段需求,具体表结构在计划/实现阶段设计
+- Q: 应用的非功能质量属性(性能、可观测性)应该达到什么水平？ → A: 定义基本性能目标(页面加载 <3s, API 响应 <2s)和基础日志要求(error + 关键业务流程)
+- Q: Stripe Webhook 端点应该如何验证请求的真实性？ → A: 实现 Webhook 签名验证(使用 Stripe 官方库验证),防止伪造请求,符合安全最佳实践

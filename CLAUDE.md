@@ -148,3 +148,9 @@ Next.js 工程在 `web/`：
 - 不要猜：先查 `.specify/memory/constitution.md`、`spec.md`、`README.md`
 - 仍不确定：提出 1–3 个清晰问题让我决策
 - 需要新增依赖/改结构：先说明收益与风险，再做最小变更方案
+
+## Active Technologies
+- TypeScript 5.x, Next.js 14 (App Router), Node.js 18+ (001-jobpin-mvp)
+
+## Recent Changes
+- 001-jobpin-mvp: Added TypeScript 5.x, Next.js 14 (App Router), Node.js 18+

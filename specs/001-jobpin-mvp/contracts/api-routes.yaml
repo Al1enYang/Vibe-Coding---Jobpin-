@@ -1,0 +1,284 @@
+openapi: 3.0.3
+info:
+  title: Jobpin MVP API
+  description: API endpoints for Jobpin MVP application
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+  - url: https://your-domain.vercel.app
+    description: Production server (Vercel)
+
+tags:
+  - name: Resume
+    description: Resume parsing and management
+  - name: Stripe
+    description: Stripe webhook handling
+
+paths:
+  /api/resume/parse:
+    post:
+      tags:
+        - Resume
+      summary: Parse uploaded PDF resume
+      description: |
+        Uploads a PDF resume file and returns structured parsing results.
+
+        **Process**:
+        1. Receive PDF file (multipart/form-data)
+        2. Extract text using pdf-parse
+        3. Call OpenAI GPT-4o-mini with Structured Outputs
+        4. Save results to Supabase (upsert)
+        5. Return structured data
+
+        **Timeout**: 60 seconds per external API call
+        **Retry**: Auto-retry once on timeout/5xx error
+      operationId: parseResume
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: PDF resume file (max 10MB)
+      responses:
+        '200':
+          description: Resume parsed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/ResumeParsingResult'
+        '400':
+          description: Bad request (invalid file, file too large, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                success: false
+                error: "Invalid file type. Only PDF files are allowed."
+        '401':
+          description: Unauthorized (user not logged in)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                success: false
+                error: "Authentication required"
+        '500':
+          description: Internal server error (parsing failed, timeout, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                success: false
+                error: "Resume parsing service unavailable. Please try again."
+        '503':
+          description: Service unavailable (external API timeout/failed)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                success: false
+                error: "Parsing service timeout. Please retry."
+      security:
+        - ClerkAuth: []
+
+  /api/stripe/webhook:
+    post:
+      tags:
+        - Stripe
+      summary: Handle Stripe webhook events
+      description: |
+        Receives and processes Stripe webhook events for subscription management.
+
+        **Security**:
+        - Validates Stripe signature using `STRIPE_WEBHOOK_SECRET`
+        - Rejects invalid signatures with 401
+
+        **Events Handled**:
+        - `checkout.session.completed`: User completed checkout
+        - `customer.subscription.updated`: Subscription updated
+        - `customer.subscription.deleted`: Subscription cancelled
+
+        **Database Operations**:
+        - Create/update subscription record in Supabase
+        - Update subscription status and next billing date
+      operationId: stripeWebhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: Event ID
+                type:
+                  type: string
+                  description: Event type
+                  enum:
+                    - checkout.session.completed
+                    - customer.subscription.updated
+                    - customer.subscription.deleted
+                data:
+                  type: object
+                  description: Event data payload
+      responses:
+        '200':
+          description: Webhook processed successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "OK"
+        '400':
+          description: Bad request (invalid payload)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized (invalid Stripe signature)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                success: false
+                error: "Invalid signature"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    ResumeParsingResult:
+      type: object
+      description: Structured resume parsing result
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier
+        clerk_user_id:
+          type: string
+          description: Clerk user ID
+        full_name:
+          type: string
+          description: Full name from resume
+          example: "John Doe"
+        email:
+          type: string
+          format: email
+          description: Email address
+          example: "john.doe@example.com"
+        phone:
+          type: string
+          description: Phone number
+          example: "+1-234-567-8900"
+        skills:
+          type: array
+          description: List of skills
+          items:
+            type: string
+          example: ["JavaScript", "TypeScript", "React", "Node.js"]
+        experiences:
+          type: array
+          description: Work experience entries
+          items:
+            $ref: '#/components/schemas/Experience'
+        resume_summary:
+          type: string
+          description: Professional summary
+          example: "Software engineer with 5 years of experience..."
+        parsed_at:
+          type: string
+          format: date-time
+          description: When the resume was parsed
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - clerk_user_id
+        - skills
+        - experiences
+
+    Experience:
+      type: object
+      description: Work experience entry
+      properties:
+        company:
+          type: string
+          description: Company name
+          example: "Tech Company Inc."
+        title:
+          type: string
+          description: Job title
+          example: "Senior Software Engineer"
+        start:
+          type: string
+          description: Start date (ISO format or YYYY-MM)
+          example: "2020-01"
+        end:
+          type: string
+          description: End date (ISO format or YYYY-MM), null if current
+          example: "2023-12"
+          nullable: true
+        summary:
+          type: string
+          description: Job description and achievements
+          example: "Led development of core features..."
+      required:
+        - company
+        - title
+        - start
+
+    Error:
+      type: object
+      description: Error response
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          description: Human-readable error message
+          example: "An error occurred"
+      required:
+        - success
+        - error
+
+  securitySchemes:
+    ClerkAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: |
+        Clerk JWT token in format: `Bearer <token>`
+
+        Clerk middleware verifies the token and sets `auth.uid()` for RLS policies.
