@@ -1280,3 +1280,7 @@ T011 - 配置 Clerk 环境变量
   1. 测试 T043（重定向）：登录新用户 → 直接访问 /dashboard → 应重定向到 /onboarding/rolename
   2. 测试 T042（完成）：完成 4 步 onboarding → 点击 "Start" → 进入 /dashboard
   3. 测试 T044（已完成用户）：已完成 onboarding 的用户访问 /dashboard → 正常加载
+
+
+  # Vercel 部署
+  请帮我把当前项目部署到 Vercel，生成一个可访问的预览链接。项目的 GitHub 地址是 https://github.com/Al1enYang/Vibe-Coding---Jobpin-.git 

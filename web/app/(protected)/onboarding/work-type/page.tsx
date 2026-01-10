@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { saveWorkType, getWorkType } from '@/lib/actions/work-type';
 
 type WorkType = 'part-time' | 'full-time' | 'internship';
 
-export default function WorkTypePage() {
+function WorkTypeContent() {
   const searchParams = useSearchParams();
   const fromDashboard = searchParams.get('from') === 'dashboard';
 
@@ -171,5 +171,13 @@ export default function WorkTypePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function WorkTypePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen p-8 flex items-center justify-center"><div className="text-muted-foreground">Loading...</div></div>}>
+      <WorkTypeContent />
+    </Suspense>
   );
 }
