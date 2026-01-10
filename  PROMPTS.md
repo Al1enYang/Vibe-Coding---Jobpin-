@@ -1,4 +1,4 @@
-1. 梳理和页面结构
+# 1. 梳理和页面结构
 # 1.1 梳理文档
 @README.md 我生成好了一个我自己版本的README.md 文档,其中要开发这个项目的话你认为我的项目结构清晰吗?是否需要补充或修改? 
 
@@ -597,7 +597,7 @@
   3. 添加验证步骤章节 (具体命令 + 检查清单)
   4. 添加风险与回滚章节 (风险识别 + 应对方案)
 
-  # 2.4 Continue
+  # 2.4 跟进补充
   添加的内容
 
   1. 实施步骤
@@ -667,7 +667,7 @@
 
   建议: 改为 "Step 5: Initialize shadcn/ui (可选)" 或添加说明 "如果选择使用 shadcn/ui，执行以下步骤；否则可跳过此步骤"
 
-  # 2.5 Continue
+  # 2.5 细节优化
   1.需要更新 spec.md 第 266 行，改为 "不自动重试，直接显示错误提示，允许用户手动重试“
   2.修改说明为"Step 5: Initialize shadcn/ui(本项目采用shadcn/ui)
   修改完让我审核 plan.md 
@@ -791,3 +791,230 @@
 
   # 3.1 Output
   已将所有 "生产就绪/发布门控" 相关表述修改为 "代码测试就绪/Demo 就绪/MVP 就绪
+
+  # 4 分析代码
+  /speckit.analyze
+
+  # Output
+  覆盖率: 17/18 需求有关联任务 (94%)
+  未覆盖: API 响应时间验证
+
+  ---
+  宪法对齐问题
+
+  无 CRITICAL 或 HIGH 宪法违规。项目遵循以下原则：
+
+  - ✅ 需求已复述（plan.md:L60-64）
+  - ✅ 验收点明确（spec.md 第 5 节）
+  - ✅ 计划待审核（plan.md:L90）
+  - ✅ 小步迭代策略（plan.md:L94）
+  - ✅ 验证步骤明确（plan.md:L99）
+
+  后续建议
+
+  立即处理（实施前）
+
+  无 CRITICAL 问题，可按原计划开始实施。但建议在实施前处理以下 HIGH 项：
+
+  1. [C1] Dashboard 引导实现方式 - 与用户确认交互方案
+  2. [C2] 进度条计算逻辑 - 明确权重公式
+  3. [E1] 添加性能验证任务 - 在 tasks.md 第七阶段补充 T079b
+
+  可在实施中处理
+
+  以下 MEDIUM 项可在第一轮实施时同步修复：
+
+  1. [B1] UI 风格描述 - 可在 T006 实现时明确配色方案
+  2. [A1] 删除重复描述 - 文档清理，不影响实施
+  3. [F1] MVP 范围说明 - 在 spec.md 添加范围小节
+  4. [E2] 日志格式规范 - 在 T074 实现时补充
+
+  可延后处理
+
+  以下 LOW 项不影响 MVP 实施：
+
+  1. [D1] LLM 模型名称 - 与 DMXAPI 实际对接时验证
+  2. [F2] 术语统一 - 代码风格问题，可后续 PR 统一
+  3. [F3] axios 依赖 - 若使用 fetch 则删除，否则移除"可选"
+
+  # 4.1 完善task文档实现方式
+  我接受修复 C1: Dashboard 首次引导实现方式和修复 C2: 进度条计算逻辑的修复建议。                                                                                                                       
+  我也采纳修复 E1: 添加性能验证任务的想法，但有几点需要调整：                                                                                                                                          
+  调整 1：LCP 的环境条件不要写死 “4G 网络” -  改成 "使用 Lighthouse（Chrome DevTools）在 Desktop profile 下测试；记录分数和 LCP 数值（目标 <3s，若未达标给出主要原因与最小修复建议）"                  
+  调整 2：API <2s 只测“普通 API”，并写清楚“非硬门槛” -  改成 "用 DevTools Network 采样 3 次，记录 p95/大致范围；不含 PDF/LLM 解析接口；若                                                              
+  >2s，记录原因（冷启动/DB/RLS/网络）并给出改进建议（可不实施）"                                                                                                                                       
+  调整 3：任务优先级标注为 P2 或 “Nice-to-have” - 改成 "T079 / T079a 标为 [P2] 或写 “尽力完成，不阻塞交付” 
+
+  # 4.1 Output
+  宪法对齐检查
+
+  ✅ 无冲突发现
+
+  - 所有 3 个 gating items（CHK001, CHK002, CHK006）在 tasks.md 中有对应任务
+  - 小步迭代原则：任务按 1-3 个粒度拆分
+  - 验证步骤：每个用户故事定义了独立测试标准
+  - 密钥保护：T082-T084 专门验证安全合规
+
+  ---
+  未映射任务
+
+  无 - 所有 85 个任务均可追溯到 spec.md 的需求或 plan.md 的实施步骤。
+
+  # 分1-3个任务审查，确认后执行
+  请先不要写代码。
+  请你先阅读并遵守：
+   - .specify/memory/constitution.md（最高优先级协作宪法）
+   - specs/001-jobpin-mvp/plan.md 
+   - spec.md 
+   - README.md 
+   - CLAUDE.md 
+   - specs/001-jobpin-mvp/tasks.md（本次执行清单）
+   
+   目标：按 tasks.md 逐条落实一个 Jobpin-like MVP（Next.js14 + Clerk + Supabase + Stripe），不要新增范围外功能。
+   请输出：
+   1) 复述本轮要做的 tasks（只选 1–3 条，必须来自 tasks.md），并列出对应验收点
+   2) 列出你需要我确认的任何问题（如果没有就写“无”）
+   3) 给出本轮最小改动计划（会改/新建哪些文件）
+   
+   在我确认前不要开始执行。
+
+   # Output
+   验证步骤：
+  1. cd web && npm run dev - 确认开发服务器启动
+  2. 访问 http://localhost:3000 - 确认看到默认欢迎页
+  3. npm run typecheck - 确认无类型错误
+  4. npm run lint - 确认无 ESLint 错误
+
+  # 生成 Next.js
+  开始执行本轮 tasks：T001、T002。
+
+  要求：
+  - 只做这两条，不要提前做 shadcn、Supabase、Clerk、Stripe
+  - 在仓库根目录下创建 web/，并在 web/ 内完成初始化
+  - 每一步完成后给我高层次说明
+  - 最后给出并执行验证步骤：npm install 完成 + npm run dev 能启动（或给出明确错误与修复）
+
+  交付：
+  - 列出新增/修改文件清单
+  - 给我本轮验收步骤（我可以照着跑）
+
+  # Output
+  本轮验收步骤（你可以照着跑）
+
+  1. 进入 web 目录
+  cd /Users/Allen/Desktop/4/Vibe\ Coding/web
+
+  2. 检查依赖是否完整
+  npm run ls
+
+  3. 运行 TypeScript 类型检查
+  npm run typecheck
+  # 预期：无错误输出
+
+  4. 运行 ESLint 检查
+  npm run lint
+  # 预期：无错误输出
+
+  5. 启动开发服务器
+  npm run dev
+  # 预期：看到 "Ready" 和 "http://localhost:3000"
+
+  6. 在浏览器访问
+  # 打开 http://localhost:3000
+  # 预期：看到 Next.js 默认欢迎页（带有 "Get started by editing..." 文字）
+
+  # 生成基础结构
+  本轮只做：T004、T005、T006。
+
+  请先复述这三条 tasks 的验收标准，然后列出需要我确认的问题（如无写无），我确认后再动手。
+
+   要求：
+  - T006 的 Tailwind 主题只做“轻度 jobpin 风格”，不要花时间做精美 UI
+  - 若 create-next-app 已生成 tailwind.config.ts，则只做最小增量修改
+  - 最后必须执行并报告：npm run lint（若无 lint 脚本则说明并补上）+ npm run typecheck（如需要新增脚本）
+
+  # Output
+  T004 - 当前状态：web/.gitignore 已有 .env* 规则（涵盖 .env.local），✅ 已满足验收标准
+  T005 - 当前状态：
+  - strict: true ✅
+  - typecheck: "tsc --noEmit" ✅
+  - lint: "eslint" ✅
+  已满足验收标准
+  T006 - 当前状态：项目中不存在 tailwind.config.ts，需要创建
+
+  # 初始化 Supabase
+  本轮只做：T007、T008、T010。（先不做 T009 的复杂 RLS；如 Supabase 默认需要 RLS，请只做最小可用策略，不要写复杂规则。）
+
+  先输出：
+  - 复述这三条的验收点
+  - 你需要我提供/确认的 Supabase 信息（例如 SQL 脚本位置、表名、字段是否一致）
+  我确认后再执行。
+
+  实现要求：
+  - web/lib/supabase.ts：只做一个客户端单例（不要引入服务端 supabase auth 复杂集成）
+  - 数据库：严格按 data-model.md / migrations 执行（不要自作主张改字段）
+  - 最后给出验证步骤：在 Supabase Dashboard 能看到表；本地能用 supabase-js 连接成功（简单 select 1 或读表结构）
+
+  # Output
+  ✅ T007、T008、T010 全部完成
+  验证结果
+
+  1. Supabase Dashboard 确认（用户已确认）
+  - ✅ 3 张表已创建：user_profiles, resume_parsing_results, subscriptions
+
+  2. 本地连接测试
+  1️⃣ user_profiles         ✅ Connected! Table exists
+  2️⃣ resume_parsing_results ✅ Connected! Table exists
+  3️⃣ subscriptions          ✅ Connected! Table exists
+
+  # Clerk 基础结构
+  本轮只做：T011、T012、T013、T014、T015。（如果超过 3 条，你先拆成两轮：第一轮 T012–T014，第二轮 T015 + 校验。）
+
+要求：
+- /sign-in /sign-up 使用 Clerk 预置组件
+- middleware.ts 只做路由保护：保护 /onboarding/* 和 /dashboard/*
+- 不要实现 onboarding redirect 逻辑（那是后续 T044）
+- 最后必须给出手动验收步骤：未登录访问 /dashboard 会跳 /sign-in；访问 /sign-up 能看到 Clerk 注册组件
+
+# Output
+T011 - 配置 Clerk 环境变量
+
+  - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ✅ 已存在
+  - CLERK_SECRET_KEY ✅ 已存在
+  - 重定向 URL 配置 ✅ 已存在
+
+  当前状态：.env.local 中已配置完整
+
+  T012 - 创建 web/app/layout.tsx 包含 ClerkProvider
+
+  - 更新现有 layout.tsx，添加 <ClerkProvider> 包装器
+  - 保持现有字体配置
+
+  T013 - 创建 web/app/(auth)/sign-in/page.tsx
+
+  - 使用 Clerk 的 <SignIn /> 组件
+
+  T014 - 创建 web/app/(auth)/sign-up/page.tsx
+
+  - 使用 Clerk 的 <SignUp /> 组件
+
+  T015 - 创建 web/middleware.ts
+
+  - 配置 Clerk middleware
+  - 保护 /onboarding/* 和 /dashboard/* 路由
+  - 不实现 onboarding redirect 逻辑（后续 T044）
+
+  ✅ 第一轮完成：T012-T014
+
+  第二轮预览：T015 + 校验
+
+  T015 - 创建 middleware.ts
+
+  - 保护 /onboarding/* 和 /dashboard/* 路由
+  - matcher 只匹配这两个路由组
+  - 排除 /api/*
+
+  校验步骤
+
+  1. 运行 npm run lint + npm run typecheck
+  2. 启动 dev server 测试路由保护
