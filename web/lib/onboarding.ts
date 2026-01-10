@@ -1,8 +1,9 @@
-import { supabase } from './supabase';
+import { supabaseAdmin } from './supabase';
 import type { UserProfile } from '@/types/database';
 
 /**
  * Check if user has completed onboarding
+ * Uses supabaseAdmin to bypass RLS in middleware context
  * @param userId - Clerk user ID
  * @returns true if onboarding is completed, false otherwise
  */
@@ -10,10 +11,16 @@ export async function isOnboardingComplete(
   userId: string
 ): Promise<boolean> {
   try {
-    const { data, error } = await supabase
+    // Use supabaseAdmin to bypass RLS (middleware context doesn't have Supabase auth)
+    if (!supabaseAdmin) {
+      console.error('[isOnboardingComplete] SUPABASE_SERVICE_ROLE_KEY not set');
+      return false;
+    }
+
+    const { data, error } = await supabaseAdmin
       .from('user_profiles')
       .select('onboarding_completed')
-      .eq('id', userId)
+      .eq('clerk_user_id', userId)
       .single();
 
     if (error) {

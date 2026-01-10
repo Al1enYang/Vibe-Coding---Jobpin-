@@ -1150,3 +1150,70 @@ T011 - 配置 Clerk 环境变量
 
   - ✅ npm run typecheck 无错误
   - ✅ npm run lint 无新问题
+
+
+  # Onboarding - WorkType
+  US2 Step3。本轮只做：T033、T034、T035。
+
+  要求：
+  - Work types 多选：part-time/full-time/internship
+  - Next 或 Skip 都会保存（数组可为空）
+  - 跳转 /onboarding/resume
+
+  # Output
+  T033、T034、T035 已完成。
+  已创建/修改的文件：
+
+  1. web/app/(protected)/onboarding/work-type/page.tsx - 更新了 Work Type 页面
+    - 多选复选框：part-time / full-time / internship
+    - Skip 按钮：跳过并保存空数组
+    - Next 按钮：保存选中的 work types
+    - 加载现有数据用于预填充
+    - 支持从 Dashboard 编辑模式（通过 ?from=dashboard 参数）
+  2. web/lib/actions/work-type.ts - 新建 server action
+    - saveWorkType(): 保存 work_types 数组到 Supabase
+    - getWorkType(): 获取现有的 work types 用于预填充
+    - 支持 Dashboard 编辑后返回 /dashboard
+    - 默认 onboarding 流程跳转到 /onboarding/resume
+
+  功能特性：
+
+  - ✅ Work types 多选
+  - ✅ Next 或 Skip 都会保存（数组可为空）
+  - ✅ 保存后跳转 /onboarding/resume
+  - ✅ Dashboard 编辑后 Save 返回 /dashboard（通过 ?from=dashboard 参数）
+  - ✅ typecheck 和 lint 通过
+
+
+  # Onboarding - 页面 + 上传 UI + 结果展示占位（不接 API）
+  US2 Step4-A。本轮只做：T036、T037、T038。
+
+  要求：
+  - 页面包含上传区、状态区、结果展示区
+  - 先用 mock 数据占位展示 Header/Skills/Experiences/Summary
+  - Start/Continue 默认 disabled（只有“解析成功”状态才启用）
+
+  # Output
+  原计划任务（T036-T038）
+
+  - ✅ T037: resume-upload.tsx - PDF 上传组件
+  - ✅ T038: resume-results.tsx - 结果展示组件（mock 数据）
+  - ✅ T036: resume/page.tsx - 整合两个组件 + Start 按钮
+
+  额外修复的问题
+
+  - ✅ Bug 修复: isOnboardingComplete 使用错误的字段名 (id → clerk_user_id)
+  - ✅ Bug 修复: isOnboardingComplete 使用 anon key 导致 RLS 拦截
+  - ✅ T042 提前实现: 创建 completeOnboarding server action 设置 onboarding_completed = true
+
+  创建的文件
+
+  web/components/onboarding/resume-upload.tsx
+  web/components/onboarding/resume-results.tsx
+  web/lib/actions/resume.ts
+
+  修改的文件
+
+  web/app/(protected)/onboarding/resume/page.tsx
+  web/lib/onboarding.ts
+
