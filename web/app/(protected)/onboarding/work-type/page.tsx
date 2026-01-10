@@ -8,7 +8,7 @@ type WorkType = 'part-time' | 'full-time' | 'internship';
 
 function WorkTypeContent() {
   const searchParams = useSearchParams();
-  const fromDashboard = searchParams.get('from') === 'dashboard';
+  const isEditMode = searchParams.get('edit') === '1';
 
   const [workTypes, setWorkTypes] = useState<WorkType[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,7 +48,7 @@ function WorkTypeContent() {
 
     const formData = new FormData();
     workTypes.forEach((type) => formData.append('work_types', type));
-    formData.append('redirect_destination', fromDashboard ? 'dashboard' : 'resume');
+    formData.append('redirect_destination', isEditMode ? 'dashboard' : 'resume');
 
     try {
       const result = await saveWorkType({}, formData);
@@ -71,7 +71,7 @@ function WorkTypeContent() {
 
     const formData = new FormData();
     // Empty array for skip
-    formData.append('redirect_destination', fromDashboard ? 'dashboard' : 'resume');
+    formData.append('redirect_destination', isEditMode ? 'dashboard' : 'resume');
 
     try {
       const result = await saveWorkType({}, formData);
@@ -113,7 +113,7 @@ function WorkTypeContent() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold mb-2">
-            What type of work are you looking for?
+            {isEditMode ? 'Edit your work preferences' : 'What type of work are you looking for?'}
           </h1>
           <p className="text-muted-foreground">
             Select all that apply (optional)
@@ -151,22 +151,24 @@ function WorkTypeContent() {
         )}
 
         {/* Action Buttons */}
-        <div className="flex justify-between pt-4">
-          <button
-            type="button"
-            onClick={handleSkip}
-            disabled={isSubmitting}
-            className="px-6 py-3 border border-input rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent transition-colors"
-          >
-            {isSubmitting ? 'Skipping...' : 'Skip'}
-          </button>
+        <div className={isEditMode ? "flex justify-center pt-4" : "flex justify-between pt-4"}>
+          {!isEditMode && (
+            <button
+              type="button"
+              onClick={handleSkip}
+              disabled={isSubmitting}
+              className="px-6 py-3 border border-input rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent transition-colors"
+            >
+              {isSubmitting ? 'Skipping...' : 'Skip'}
+            </button>
+          )}
           <button
             type="button"
             onClick={handleNext}
             disabled={isSubmitting}
             className="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
           >
-            {isSubmitting ? 'Saving...' : 'Next'}
+            {isSubmitting ? 'Saving...' : isEditMode ? 'Save' : 'Next'}
           </button>
         </div>
       </div>

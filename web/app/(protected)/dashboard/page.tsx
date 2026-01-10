@@ -34,7 +34,7 @@ export default async function DashboardPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Role Name Module */}
                 <a
-                  href="/onboarding/rolename"
+                  href="/onboarding/rolename?edit=1"
                   className="group p-5 bg-card border border-border rounded-xl hover:border-primary/50 transition-colors"
                 >
                   <div className="flex items-start justify-between mb-3">
@@ -50,7 +50,9 @@ export default async function DashboardPage() {
                       </div>
                       <div>
                         <h3 className="font-medium text-foreground">Role Name</h3>
-                        <p className="text-sm text-muted-foreground">{profile?.role_name || 'Not set'}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {profile?.role_name ? 'Completed' : 'Not set'}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -61,13 +63,13 @@ export default async function DashboardPage() {
 
                 {/* Profile Module */}
                 <a
-                  href="/onboarding/profile"
+                  href="/onboarding/profile?edit=1"
                   className="group p-5 bg-card border border-border rounded-xl hover:border-primary/50 transition-colors"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${profile?.first_name && profile?.last_name ? 'bg-green-500/10 text-green-500' : 'bg-muted text-muted-foreground'}`}>
-                        {profile?.first_name && profile?.last_name ? (
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${profile?.first_name && profile?.last_name && profile?.country && profile?.city ? 'bg-green-500/10 text-green-500' : 'bg-muted text-muted-foreground'}`}>
+                        {profile?.first_name && profile?.last_name && profile?.country && profile?.city ? (
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
@@ -78,8 +80,8 @@ export default async function DashboardPage() {
                       <div>
                         <h3 className="font-medium text-foreground">Profile</h3>
                         <p className="text-sm text-muted-foreground">
-                          {profile?.first_name || profile?.last_name
-                            ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim()
+                          {profile?.first_name && profile?.last_name && profile?.country && profile?.city
+                            ? 'Completed'
                             : 'Not set'}
                         </p>
                       </div>
@@ -92,7 +94,7 @@ export default async function DashboardPage() {
 
                 {/* Work Type Module */}
                 <a
-                  href="/onboarding/work-type"
+                  href="/onboarding/work-type?edit=1"
                   className="group p-5 bg-card border border-border rounded-xl hover:border-primary/50 transition-colors"
                 >
                   <div className="flex items-start justify-between mb-3">
@@ -110,7 +112,7 @@ export default async function DashboardPage() {
                         <h3 className="font-medium text-foreground">Work Type</h3>
                         <p className="text-sm text-muted-foreground">
                           {profile?.work_types && profile.work_types.length > 0
-                            ? profile.work_types.join(', ')
+                            ? 'Completed'
                             : 'Not set'}
                         </p>
                       </div>
@@ -123,13 +125,13 @@ export default async function DashboardPage() {
 
                 {/* Resume Module */}
                 <a
-                  href="/onboarding/resume"
+                  href="/onboarding/resume?edit=1"
                   className="group p-5 bg-card border border-border rounded-xl hover:border-primary/50 transition-colors"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${resume ? 'bg-green-500/10 text-green-500' : 'bg-muted text-muted-foreground'}`}>
-                        {resume ? (
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${resume && (resume.experiences?.length > 0 || resume.resume_summary?.trim().length > 0) ? 'bg-green-500/10 text-green-500' : 'bg-muted text-muted-foreground'}`}>
+                        {resume && (resume.experiences?.length > 0 || resume.resume_summary?.trim().length > 0) ? (
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
@@ -140,7 +142,7 @@ export default async function DashboardPage() {
                       <div>
                         <h3 className="font-medium text-foreground">Resume</h3>
                         <p className="text-sm text-muted-foreground">
-                          {resume ? 'Uploaded' : 'Not uploaded'}
+                          {resume && (resume.experiences?.length > 0 || resume.resume_summary?.trim().length > 0) ? 'Completed' : 'Not uploaded'}
                         </p>
                       </div>
                     </div>
@@ -157,7 +159,7 @@ export default async function DashboardPage() {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-foreground">Resume Summary</h2>
                 <a
-                  href="/onboarding/resume"
+                  href="/onboarding/resume?edit=1"
                   className="text-sm text-primary hover:underline"
                 >
                   Re-upload →
@@ -236,7 +238,7 @@ export default async function DashboardPage() {
                 <div className="text-center py-8">
                   <p className="text-muted-foreground mb-4">No resume uploaded yet</p>
                   <a
-                    href="/onboarding/resume"
+                    href="/onboarding/resume?edit=1"
                     className="inline-block px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity"
                   >
                     Upload Resume

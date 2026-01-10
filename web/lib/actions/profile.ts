@@ -14,6 +14,10 @@ export interface SaveProfileState {
  * Server action to save profile fields (first_name, last_name, country, city)
  * Performs upsert: updates existing profile
  * Uses supabaseAdmin (service_role key) to bypass RLS policies since we use Clerk for auth
+ *
+ * Supports edit mode via redirect_destination form data:
+ * - If 'dashboard', redirects to /dashboard after save
+ * - Otherwise, redirects to next onboarding step (/onboarding/work-type)
  */
 export async function saveProfile(
   prevState: SaveProfileState,
@@ -39,6 +43,10 @@ export async function saveProfile(
     return { error: 'Last name is required' };
   }
 
+  // Get redirect destination
+  const redirectDestination = formData.get('redirect_destination') as string;
+  const shouldRedirectToDashboard = redirectDestination === 'dashboard';
+
   // Check if supabaseAdmin is available
   if (!supabaseAdmin) {
     return { error: 'Server configuration error: SUPABASE_SERVICE_ROLE_KEY not set' };
@@ -50,6 +58,7 @@ export async function saveProfile(
     lastName: lastName.trim(),
     country: country?.trim() || null,
     city: city?.trim() || null,
+    redirectDestination: shouldRedirectToDashboard ? 'dashboard' : 'work-type',
     timestamp: new Date().toISOString(),
   });
 
@@ -82,7 +91,12 @@ export async function saveProfile(
   revalidatePath('/onboarding/profile');
   revalidatePath('/dashboard');
 
-  redirect('/onboarding/work-type');
+  // redirect() throws a NEXT_REDIRECT error to stop execution - this is expected
+  if (shouldRedirectToDashboard) {
+    redirect('/dashboard');
+  } else {
+    redirect('/onboarding/work-type');
+  }
 }
 
 /**

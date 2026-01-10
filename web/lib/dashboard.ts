@@ -1,23 +1,20 @@
-import { supabase } from './supabase';
+import { supabaseAdmin } from './supabase';
 import type { UserProfile, ResumeParsingResult, Subscription } from '@/types/database';
 
 /**
  * Calculate profile completion percentage
  * Based on spec.md requirements:
- * - Profile (RoleName + First Name + Last Name): 40%
- *   - RoleName: 15%
- *   - First Name: 15%
- *   - Last Name: 10%
- * - Resume: 40%
- * - Subscription: 20%
+ * - Role Name: 15% (role_name non-empty)
+ * - Profile: 40% (first_name, last_name, country, city all non-empty)
+ * - Work Type: 10% (work_types array has length > 0, optional)
+ * - Resume: 35% (experiences.length > 0 OR resume_summary non-empty)
  */
 export interface ProgressScore {
   total: number;
   roleName: number;
-  firstName: number;
-  lastName: number;
+  profile: number;
+  workType: number;
   resume: number;
-  subscription: number;
 }
 
 export function calculateProgressScore(
@@ -28,37 +25,43 @@ export function calculateProgressScore(
   const score: ProgressScore = {
     total: 0,
     roleName: 0,
-    firstName: 0,
-    lastName: 0,
+    profile: 0,
+    workType: 0,
     resume: 0,
-    subscription: 0,
   };
 
-  // Profile scores: 40% total
-  if (profile?.role_name) {
+  // Role Name: 15%
+  if (profile?.role_name && profile.role_name.trim().length > 0) {
     score.roleName = 15;
     score.total += 15;
   }
-  if (profile?.first_name) {
-    score.firstName = 15;
-    score.total += 15;
-  }
-  if (profile?.last_name) {
-    score.lastName = 10;
-    score.total += 10;
-  }
 
-  // Resume: 40%
-  // Resume is considered complete if it has at least some parsed data
-  if (resume && (resume.full_name || resume.email || resume.phone || resume.resume_summary)) {
-    score.resume = 40;
+  // Profile: 40% (first_name, last_name, country, city all non-empty)
+  const hasFirstName = profile?.first_name && profile.first_name.trim().length > 0;
+  const hasLastName = profile?.last_name && profile.last_name.trim().length > 0;
+  const hasCountry = profile?.country && profile.country.trim().length > 0;
+  const hasCity = profile?.city && profile.city.trim().length > 0;
+
+  if (hasFirstName && hasLastName && hasCountry && hasCity) {
+    score.profile = 40;
     score.total += 40;
   }
 
-  // Subscription: 20%
-  if (subscription?.active && subscription.plan === 'pro') {
-    score.subscription = 20;
-    score.total += 20;
+  // Work Type: 10% (optional - work_types array has length > 0)
+  if (profile?.work_types && profile.work_types.length > 0) {
+    score.workType = 10;
+    score.total += 10;
+  }
+
+  // Resume: 35% (experiences.length > 0 OR resume_summary non-empty)
+  if (resume) {
+    const hasExperiences = resume.experiences && resume.experiences.length > 0;
+    const hasSummary = resume.resume_summary && resume.resume_summary.trim().length > 0;
+
+    if (hasExperiences || hasSummary) {
+      score.resume = 35;
+      score.total += 35;
+    }
   }
 
   return score;
@@ -79,8 +82,18 @@ export function getProgressColor(percentage: number): string {
  */
 export async function fetchDashboardData(userId: string) {
   try {
+    // Use supabaseAdmin to bypass RLS (we use Clerk for auth)
+    if (!supabaseAdmin) {
+      console.error('[fetchDashboardData] SUPABASE_SERVICE_ROLE_KEY not set');
+      return {
+        profile: null,
+        resume: null,
+        subscription: null,
+      };
+    }
+
     // Fetch profile
-    const { data: profile, error: profileError } = await supabase
+    const { data: profile, error: profileError } = await supabaseAdmin
       .from('user_profiles')
       .select('*')
       .eq('clerk_user_id', userId)
@@ -91,7 +104,7 @@ export async function fetchDashboardData(userId: string) {
     }
 
     // Fetch resume
-    const { data: resume, error: resumeError } = await supabase
+    const { data: resume, error: resumeError } = await supabaseAdmin
       .from('resume_parsing_results')
       .select('*')
       .eq('clerk_user_id', userId)
@@ -102,7 +115,7 @@ export async function fetchDashboardData(userId: string) {
     }
 
     // Fetch subscription
-    const { data: subscription, error: subscriptionError } = await supabase
+    const { data: subscription, error: subscriptionError } = await supabaseAdmin
       .from('subscriptions')
       .select('*')
       .eq('clerk_user_id', userId)

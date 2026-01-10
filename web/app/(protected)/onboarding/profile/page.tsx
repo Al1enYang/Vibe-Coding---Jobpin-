@@ -1,9 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { saveProfile, getProfile } from '@/lib/actions/profile';
 
 export default function ProfilePage() {
+  const searchParams = useSearchParams();
+  const isEditMode = searchParams.get('edit') === '1';
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [country, setCountry] = useState('');
@@ -63,6 +66,11 @@ export default function ProfilePage() {
     if (country.trim()) formData.append('country', country);
     if (city.trim()) formData.append('city', city);
 
+    // In edit mode, redirect back to dashboard
+    if (isEditMode) {
+      formData.append('redirect_destination', 'dashboard');
+    }
+
     try {
       const result = await saveProfile({}, formData);
 
@@ -103,7 +111,7 @@ export default function ProfilePage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold mb-2">
-            Tell us about yourself
+            {isEditMode ? 'Edit your profile' : 'Tell us about yourself'}
           </h1>
           <p className="text-muted-foreground">
             Enter your name and location to personalize your profile
@@ -196,13 +204,18 @@ export default function ProfilePage() {
           )}
 
           {/* Action Buttons */}
-          <div className="flex justify-end pt-4">
+          <div className={isEditMode ? "flex justify-center pt-4" : "flex justify-between pt-4"}>
+            {!isEditMode && (
+              <div className="text-sm text-muted-foreground">
+                Country and city are optional
+              </div>
+            )}
             <button
               type="submit"
               disabled={isNextDisabled}
               className="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
             >
-              {isSubmitting ? 'Saving...' : 'Next'}
+              {isSubmitting ? 'Saving...' : isEditMode ? 'Save' : 'Next'}
             </button>
           </div>
         </form>

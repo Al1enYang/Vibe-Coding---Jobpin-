@@ -1,16 +1,38 @@
 'use client';
 
-import { useState } from 'react';
-import { saveRoleName } from '@/lib/actions/rolename';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { saveRoleName, getRoleName } from '@/lib/actions/rolename';
 
 export default function RoleNamePage() {
+  const searchParams = useSearchParams();
+  const isEditMode = searchParams.get('edit') === '1';
+
   const [roleName, setRoleName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const isValid = roleName.trim().length > 0;
   const isNextDisabled = !isValid || isSubmitting;
+
+  // Load existing role name on mount
+  useEffect(() => {
+    const loadRoleName = async () => {
+      try {
+        const data = await getRoleName();
+        if (data?.role_name) {
+          setRoleName(data.role_name);
+        }
+      } catch (e) {
+        console.error('Error loading role name:', e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadRoleName();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRoleName(e.target.value);
@@ -29,6 +51,11 @@ export default function RoleNamePage() {
     const formData = new FormData();
     formData.append('role_name', roleName);
 
+    // In edit mode, redirect back to dashboard
+    if (isEditMode) {
+      formData.append('redirect_destination', 'dashboard');
+    }
+
     try {
       const result = await saveRoleName({}, formData);
 
@@ -43,6 +70,14 @@ export default function RoleNamePage() {
       setIsSubmitting(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen p-8 flex items-center justify-center">
+        <div className="text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen p-8">
@@ -61,7 +96,7 @@ export default function RoleNamePage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold mb-2">
-            What is your role name?
+            {isEditMode ? 'Edit your role name' : 'What is your role name?'}
           </h1>
           <p className="text-muted-foreground">
             Enter the role name you want to use on your profile
@@ -100,13 +135,18 @@ export default function RoleNamePage() {
           )}
 
           {/* Action Buttons */}
-          <div className="flex justify-end pt-4">
+          <div className={isEditMode ? "flex justify-center pt-4" : "flex justify-between pt-4"}>
+            {!isEditMode && (
+              <div className="text-sm text-muted-foreground">
+                You can always change this later
+              </div>
+            )}
             <button
               type="submit"
               disabled={isNextDisabled}
               className="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
             >
-              {isSubmitting ? 'Saving...' : 'Next'}
+              {isSubmitting ? 'Saving...' : isEditMode ? 'Save' : 'Next'}
             </button>
           </div>
         </form>

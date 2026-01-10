@@ -1,12 +1,15 @@
 'use client';
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { ResumeUpload, UploadStatus } from '@/components/onboarding/resume-upload';
 import { ResumeResults } from '@/components/onboarding/resume-results';
 import type { ResumeParsingResult } from '@/types/database';
 import { completeOnboarding } from '@/lib/actions/resume';
 
 export default function ResumePage() {
+  const searchParams = useSearchParams();
+  const isEditMode = searchParams.get('edit') === '1';
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>('idle');
   const [fileName, setFileName] = useState<string>();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -136,7 +139,9 @@ export default function ResumePage() {
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold mb-2">Upload your resume</h1>
+          <h1 className="text-2xl font-bold mb-2">
+            {isEditMode ? 'Update your resume' : 'Upload your resume'}
+          </h1>
           <p className="text-muted-foreground">
             We&apos;ll extract your skills, experience, and contact information
           </p>
@@ -244,7 +249,7 @@ export default function ResumePage() {
             disabled={isStartDisabled}
             className="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
           >
-            {isSubmitting ? 'Saving...' : 'Start'}
+            {isSubmitting ? 'Saving...' : isEditMode ? 'Save' : 'Start'}
           </button>
         </div>
       </div>

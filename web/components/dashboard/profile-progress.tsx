@@ -37,17 +37,17 @@ export function ProfileProgress({ profile, resume, subscription }: ProfileProgre
           <span className="ml-auto font-medium">15%</span>
         </div>
 
-        {/* First Name */}
-        <div className={`flex items-center gap-2 ${score.firstName > 0 ? 'text-foreground' : 'text-muted-foreground'}`}>
-          <span className={`w-2 h-2 rounded-full ${score.firstName > 0 ? 'bg-green-500' : 'bg-muted-foreground'}`} />
-          <span>First Name</span>
-          <span className="ml-auto font-medium">15%</span>
+        {/* Profile */}
+        <div className={`flex items-center gap-2 ${score.profile > 0 ? 'text-foreground' : 'text-muted-foreground'}`}>
+          <span className={`w-2 h-2 rounded-full ${score.profile > 0 ? 'bg-green-500' : 'bg-muted-foreground'}`} />
+          <span>Profile</span>
+          <span className="ml-auto font-medium">40%</span>
         </div>
 
-        {/* Last Name */}
-        <div className={`flex items-center gap-2 ${score.lastName > 0 ? 'text-foreground' : 'text-muted-foreground'}`}>
-          <span className={`w-2 h-2 rounded-full ${score.lastName > 0 ? 'bg-green-500' : 'bg-muted-foreground'}`} />
-          <span>Last Name</span>
+        {/* Work Type */}
+        <div className={`flex items-center gap-2 ${score.workType > 0 ? 'text-foreground' : 'text-muted-foreground'}`}>
+          <span className={`w-2 h-2 rounded-full ${score.workType > 0 ? 'bg-green-500' : 'bg-muted-foreground'}`} />
+          <span>Work Type</span>
           <span className="ml-auto font-medium">10%</span>
         </div>
 
@@ -55,14 +55,7 @@ export function ProfileProgress({ profile, resume, subscription }: ProfileProgre
         <div className={`flex items-center gap-2 ${score.resume > 0 ? 'text-foreground' : 'text-muted-foreground'}`}>
           <span className={`w-2 h-2 rounded-full ${score.resume > 0 ? 'bg-green-500' : 'bg-muted-foreground'}`} />
           <span>Resume</span>
-          <span className="ml-auto font-medium">40%</span>
-        </div>
-
-        {/* Subscription */}
-        <div className={`flex items-center gap-2 ${score.subscription > 0 ? 'text-foreground' : 'text-muted-foreground'}`}>
-          <span className={`w-2 h-2 rounded-full ${score.subscription > 0 ? 'bg-green-500' : 'bg-muted-foreground'}`} />
-          <span>Subscription</span>
-          <span className="ml-auto font-medium">20%</span>
+          <span className="ml-auto font-medium">35%</span>
         </div>
       </div>
     </div>
