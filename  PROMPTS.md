@@ -1078,7 +1078,7 @@ T011 - 配置 Clerk 环境变量
   - 路由保护（未登录重定向到 /sign-in）
   - Onboarding 状态检查（未完成 onboarding 重定向到 /onboarding/rolename）
 
-  # Onboarding page
+  # Onboarding - RoleName
   开始 US2 Step1。本轮只做：T027、T028、T029。
 
   要求：
@@ -1089,3 +1089,64 @@ T011 - 配置 Clerk 环境变量
   - 最后给出验证步骤：新用户能保存并跳转
 
   # Output
+  验证步骤
+
+  1. 重启开发服务器：
+  停止服务器 (Ctrl+C)
+  npm run dev
+  2. 测试流程：
+    - 访问 /onboarding/rolename
+    - 输入 role_name（例如："Software Engineer"）
+    - 点击 "Next"
+    - 应该成功保存并重定向到 /onboarding/profile
+  3. 验证数据库：
+  在 Supabase Dashboard 的 Table Editor 中查看 user_profiles 表，应该能看到新记录。
+
+  已实现的任务
+
+  T027 - /onboarding/rolename 独立页面
+  - 创建了完整的表单页面组件
+  - 包含进度指示器（第 1 步，共 4 步）
+  - 美观的 UI 布局
+
+  T028 - RoleName 验证
+  - 必填字段验证
+  - Next 按钮在输入为空时禁用
+  - 实时视觉反馈
+  - 输入框自动聚焦
+
+  T029 - Supabase 保存 + 跳转
+  - 使用 supabaseAdmin (service_role key) 绕过 RLS 策略
+  - upsert 操作保存到 user_profiles 表
+  - 成功后重定向到 /onboarding/profile
+
+  
+  # Onboarding - Profile
+  US2 Step2。本轮只做：T030、T031、T032。
+
+  要求：
+  - First/Last 必填，Country/City 可选
+  - Save/Next：upsert 并跳转 /onboarding/work-type
+  - 支持预填充（从 DB 读取已有值）
+
+  # Output
+  实现内容
+
+  1. Server Action (web/lib/actions/profile.ts)
+
+  - saveProfile: 保存 first_name, last_name, country, city 字段
+  - getProfile: 获取已有数据用于预填充表单
+
+  2. Profile 页面 (web/app/(protected)/onboarding/profile/page.tsx)
+
+  - 4 个输入字段：First Name (必填), Last Name (必填), Country (可选), City (可选)
+  - 进度指示器: Step 2 of 4
+  - 自动聚焦第一个输入框
+  - 预填充已有数据
+  - 表单验证与错误处理
+  - Next 按钮保存并跳转 /onboarding/work-type
+
+  验证通过
+
+  - ✅ npm run typecheck 无错误
+  - ✅ npm run lint 无新问题
