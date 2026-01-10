@@ -4,6 +4,7 @@ import type { Experience } from '@/types/database';
 import { fetchDashboardData } from '@/lib/dashboard';
 import { WelcomeHeader } from '@/components/dashboard/welcome-header';
 import { ProfileProgress } from '@/components/dashboard/profile-progress';
+import { DashboardClient } from '@/components/dashboard/dashboard-client';
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -16,20 +17,21 @@ export default async function DashboardPage() {
   const { profile, resume, subscription } = await fetchDashboardData(userId);
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto p-6 lg:p-8">
-        {/* Welcome Header */}
-        <WelcomeHeader />
+    <DashboardClient profile={profile} resume={resume} subscription={subscription}>
+      <div className="min-h-screen bg-background">
+        <div className="max-w-6xl mx-auto p-6 lg:p-8">
+          {/* Welcome Header */}
+          <WelcomeHeader />
 
-        {/* Profile Progress */}
-        <ProfileProgress profile={profile} resume={resume} subscription={subscription} />
+          {/* Profile Progress */}
+          <ProfileProgress profile={profile} resume={resume} subscription={subscription} />
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column: Onboarding Modules */}
           <div className="lg:col-span-2 space-y-6">
             {/* Onboarding Modules Section */}
-            <section>
+            <section data-tour="onboarding-progress">
               <h2 className="text-xl font-semibold mb-4 text-foreground">Onboarding Progress</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Role Name Module */}
@@ -155,7 +157,7 @@ export default async function DashboardPage() {
             </section>
 
             {/* Resume Section */}
-            <section className="p-6 bg-card border border-border rounded-xl">
+            <section data-tour="resume-summary" className="p-6 bg-card border border-border rounded-xl">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-foreground">Resume Summary</h2>
                 <a
@@ -211,7 +213,7 @@ export default async function DashboardPage() {
 
                   {/* Experiences */}
                   {resume.experiences && resume.experiences.length > 0 && (
-                    <div>
+                    <div data-tour="experiences">
                       <p className="text-sm font-medium text-foreground mb-3">Experience</p>
                       <div className="space-y-3">
                         {resume.experiences.map((exp: Experience, index: number) => (
@@ -251,7 +253,7 @@ export default async function DashboardPage() {
           {/* Right Column: Subscription */}
           <div className="lg:col-span-1">
             {/* Subscription Section (Placeholder for now) */}
-            <section className="p-6 bg-card border border-border rounded-xl">
+            <section data-tour="subscription" className="p-6 bg-card border border-border rounded-xl">
               <h2 className="text-xl font-semibold mb-4 text-foreground">Subscription</h2>
 
               {subscription?.active && subscription.plan === 'pro' ? (
@@ -280,6 +282,7 @@ export default async function DashboardPage() {
                   </div>
                   <a
                     href="#"
+                    data-tour="upgrade"
                     className="block w-full text-center px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
                   >
                     Upgrade to Pro
@@ -291,5 +294,6 @@ export default async function DashboardPage() {
         </div>
       </div>
     </div>
+    </DashboardClient>
   );
 }

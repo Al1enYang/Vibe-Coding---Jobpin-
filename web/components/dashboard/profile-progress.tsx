@@ -14,7 +14,7 @@ export function ProfileProgress({ profile, resume, subscription }: ProfileProgre
   const progressColor = getProgressColor(score.total);
 
   return (
-    <div className="mb-8 p-6 bg-card border border-border rounded-xl">
+    <div data-tour="profile-completion" className="mb-8 p-6 bg-card border border-border rounded-xl">
       <div className="flex justify-between items-center mb-3">
         <h2 className="text-lg font-semibold text-foreground">Profile Completion</h2>
         <span className="text-2xl font-bold text-foreground">{score.total}%</span>
