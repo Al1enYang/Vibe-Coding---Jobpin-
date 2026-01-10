@@ -1251,3 +1251,32 @@ T011 - 配置 Clerk 环境变量
   - ✅ Start 按钮启用，点击后跳转 Dashboard
   - ✅ Supabase resume_parsing_results 表成功保存/更新数据
   - ✅ 重新上传覆盖旧数据
+
+
+  # Onboardinng - dashhboard redirect
+  US2 完成逻辑。本轮只做：T042、T043、T044。
+
+  要求：
+  - Start/Continue：设置 onboarding_completed=true 并进入 /dashboard
+  - middleware 或 server side 逻辑：未完成 onboarding 的用户访问 /dashboard 会重定向回 /    onboarding/rolename
+  - 注意：这条逻辑不应该影响已完成 onboarding 的用户
+  - 给出验证脚本：未完成→跳转；完成→可进 dashboard
+
+  # Output
+  已创建验证脚本：web/.test-scripts/test-onboarding-flow.sh
+
+  运行方式：
+  cd web && ./.test-scripts/test-onboarding-flow.sh
+
+  脚本功能：
+  1. 检查数据库和表结构
+  2. 创建测试用户（完成/未完成 onboarding）
+  3. 验证 T043：未完成用户的 onboarding_completed=false
+  4. 验证 T042：模拟 completeOnboarding() 更新状态
+  5. 验证 T044：完成用户的状态正确
+
+  浏览器手动验证步骤
+
+  1. 测试 T043（重定向）：登录新用户 → 直接访问 /dashboard → 应重定向到 /onboarding/rolename
+  2. 测试 T042（完成）：完成 4 步 onboarding → 点击 "Start" → 进入 /dashboard
+  3. 测试 T044（已完成用户）：已完成 onboarding 的用户访问 /dashboard → 正常加载
