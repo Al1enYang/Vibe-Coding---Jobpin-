@@ -1018,3 +1018,40 @@ T011 - 配置 Clerk 环境变量
 
   1. 运行 npm run lint + npm run typecheck
   2. 启动 dev server 测试路由保护
+
+  # 预期结果未达到
+  尝试输入Propmt: 
+  1. 访问 http://localhost:3000/dashboard 和 http://localhost:3000/onboarding/rolename 页面未重定向到 /sign-in
+  2. 未重定向，我需要说明一点，我在第一次访问sign-up页面时可以正常显示的，我想尝试注册一下看看，再输入完邮箱密码之后确实会跳转到输入验证码的页面，我输入完后点击继续就跳转到onboarding的路由，然后现在我  
+  想回去访问sign-up页面时页面自动跳到https://www.google.com/search?q=&rlz=1C5CHFA_enAU1098AU1110&sourceid=chrome&ie=UTF-8&udm=50&aep=48&cud=0&qsubts=1768011700765，而且现在我在访问sign-in页面时重定  
+  向到了onboarding但页面是404
+  3.我现在如何退出登录状态，好像我重启了服务器后还是登录状态，因为我访问dashboard和onboarding/rolename时页面都跳转到了"https://www.google.com/search?q=&rlz=1C5CHFA_enAU1098AU1110&sourceid=chrome&ie=UT 
+  F-8&udm=50&aep=48&cud=0&qsubts=1768012653452"，我现在访问sign-up 重定向到 /onboarding/rolename 显示占位页面（成功），访问sign-in 重定向到 /onboarding/rolename（成功）
+
+  # 解决问题的Prompt
+  访问/dashboard现在能正确重定向到/sign-in,但有报错：
+  我现在遇到 Clerk 登录页报错，需要你定位原因并用最小改动修复。
+
+  ## 现象
+  - 访问 /dashboard 时会被 middleware 重定向到 /sign-in（这部分 OK）
+  - 但 /sign-in 页面控制台报错：
+    1) GET /sign-in/SignIn_clerk_catch_all_check/... 404
+    2) Uncaught Error: Clerk: The <SignIn/> component is not configured correctly.
+    提示原因包括：
+    - "/sign-in" route is not a catch-all route，建议改成 /sign-in/[[...rest]]/page.tsx
+    - 或 middleware 保护了 /sign-in 下的子路由
+  浏览器网络面板中 /dashboard 请求的状态码是 307（Temporary Redirect）
+
+  # Output
+  手动验收结果 ✅
+  ┌─────────────────────────────────┬──────────────────────────────────┐
+  │            测试场景             │               结果               │
+  ├─────────────────────────────────┼──────────────────────────────────┤
+  │ 未登录访问 /dashboard           │ ✅ 307 重定向到 /sign-in         │
+  ├─────────────────────────────────┼──────────────────────────────────┤
+  │ 未登录访问 /onboarding/rolename │ ✅ 307 重定向到 /sign-in         │
+  ├─────────────────────────────────┼──────────────────────────────────┤
+  │ 访问 /sign-in                   │ ✅ 显示 Clerk 登录组件（无报错） │
+  ├─────────────────────────────────┼──────────────────────────────────┤
+  │ 访问 /sign-up                   │ ✅ 显示 Clerk 注册组件（无报错） │
+  └─────────────────────────────────┴──────────────────────────────────┘
