@@ -1055,3 +1055,37 @@ T011 - 配置 Clerk 环境变量
   ├─────────────────────────────────┼──────────────────────────────────┤
   │ 访问 /sign-up                   │ ✅ 显示 Clerk 注册组件（无报错） │
   └─────────────────────────────────┴──────────────────────────────────┘
+
+  # 实现 landing page
+  开始 US1。本轮只做：T022、T023、T024。
+
+  要求：
+  - 落地页只需基础结构：Hero + CTA（指向 /sign-up）+ How it works 2 步卡片
+  - 不要引入 shadcn（除非已经做了 T003）
+  - 结束时给出手动验收：访问 /，点击 CTA 到 /sign-up
+
+  本轮只做：T025、T026（US1 测试）。
+  请给我一份“手动验收脚本”，按 tasks.md 的独立测试 1-6 步逐条验证（注册、邮箱验证码、路由保护、登出后访问 /dashboard 跳转等）。
+  执行过程中遇到 Clerk 默认行为差异，先说明差异并给出最小修正方案。
+
+  # Output
+  T022、T023、T024 完成并验证通过 ✅
+
+  US2 已完成功能：
+  - 落地页（Hero + CTA + How it works）
+  - 注册/登录流程
+  - 邮箱验证码验证
+  - 路由保护（未登录重定向到 /sign-in）
+  - Onboarding 状态检查（未完成 onboarding 重定向到 /onboarding/rolename）
+
+  # Onboarding page
+  开始 US2 Step1。本轮只做：T027、T028、T029。
+
+  要求：
+  - /onboarding/rolename 独立页面
+  - RoleName 必填，空时 Next disabled
+  - 保存到 Supabase user_profiles.role_name（upsert）
+  - 完成后跳转到 /onboarding/profile
+  - 最后给出验证步骤：新用户能保存并跳转
+
+  # Output
