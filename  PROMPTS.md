@@ -1185,7 +1185,7 @@ T011 - 配置 Clerk 环境变量
   - ✅ typecheck 和 lint 通过
 
 
-  # Onboarding - 页面 + 上传 UI + 结果展示占位（不接 API）
+  # Onboarding - Resume 页面 + 上传 UI + 结果展示占位（不接 API）
   US2 Step4-A。本轮只做：T036、T037、T038。
 
   要求：
@@ -1217,3 +1217,37 @@ T011 - 配置 Clerk 环境变量
   web/app/(protected)/onboarding/resume/page.tsx
   web/lib/onboarding.ts
 
+
+  # Onboarding - Resume API parse + lib 集成 + 错误对话框
+  US2 Step4-B。本轮只做：T039、T040、T041。
+
+  要求：
+  - POST /api/resume/parse：接收 PDF（multipart 或 base64 任选，但要说明）
+  - 服务端调用 DMXAPI PDF 解析 → 再调用 LLM 整理 → 保存到 resume_parsing_results（每用户覆盖）
+  - 错误处理：上传取消/解析失败/超时 → 弹对话框并提供重试
+  - 不要把任何 key 暴露到客户端
+  - 最后给出端到端验收：上传 PDF → 页面出现结构化结果 → Start/Continue 启用
+
+  # Output
+  完成的功能
+  ┌──────┬──────┬──────────────────────────────┐
+  │ 任务 │ 状态 │             说明             │
+  ├──────┼──────┼──────────────────────────────┤
+  │ T039 │ ✅   │ POST /api/resume/parse 端点  │
+  ├──────┼──────┼──────────────────────────────┤
+  │ T040 │ ✅   │ DMXAPI PDF 解析 + LLM 结构化 │
+  ├──────┼──────┼──────────────────────────────┤
+  │ T041 │ ✅   │ 错误处理和用户反馈           │
+  └──────┴──────┴──────────────────────────────┘
+  交付文件
+
+  - web/app/api/resume/parse/route.ts - 服务端解析 API
+  - web/app/(protected)/onboarding/resume/page.tsx - 上传页面（集成 API）
+
+  验收通过
+
+  - ✅ 上传 PDF → 显示 "Uploading..." → "Parsing..." → 成功
+  - ✅ 页面显示结构化结果（联系人、技能、经历、摘要）
+  - ✅ Start 按钮启用，点击后跳转 Dashboard
+  - ✅ Supabase resume_parsing_results 表成功保存/更新数据
+  - ✅ 重新上传覆盖旧数据
