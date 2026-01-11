@@ -1,8 +1,8 @@
-# 1. 梳理和页面结构
-# 1.1 梳理文档
+# 梳理和页面结构
+# 梳理文档
 @README.md 我生成好了一个我自己版本的README.md 文档,其中要开发这个项目的话你认为我的项目结构清晰吗?是否需要补充或修改? 
 
-# 1.1 Output
+# Output
 我来仔细分析你的 README.md 结构和内容。
 
   整体评价：结构清晰，内容完整度 85%
@@ -98,10 +98,10 @@
   6. 开发规范提醒
   7. 常见问题 FAQ（如 webhook 延迟怎么调试）
 
-# 1.2 梳理文档
+# 梳理文档
 @CLAUDE.md 我生成好了一个我自己版本的CLAUDE.md 文档,其中要开发这个项目的话你认为我的内容或结构上描述清晰吗?是否需要补充或修改? 
 
-# 1.2 Output
+# Output
 我来仔细分析你的 CLAUDE.md 文档的清晰度和完整性。
 
   整体评价：结构清晰，定位准确，内容完整度 90%
@@ -228,12 +228,12 @@
 
   补充完 P0 + P1 内容后，这将成为一个非常完整的 AI Agent 入口文档！
 
- # 1.3 更改规定
+ # 更改规定
  P0的两条可以修改。P1-3我建议不写死表名:
   Supabase：存三类数据（Onboarding/Profile、Resume 解析结果、Subscription 状态）；具体 schema/表名以 README 为准。                                             
   P1-4可以修改.P1-5可以修改但不要写成强制实现细节:在首次判断语句后面加上(已实现便利为准).P2的第6和第7点先不需要修改. 
 
-  # 1.3 Output
+  # Output
   ✅ 修改总结
 
   P0（必须补充）
@@ -258,7 +258,7 @@
   ---
   现在的 CLAUDE.md 已经非常完整且灵活，既明确了关键信息（middleware、编辑返回逻辑、环境变量前置），又避免了过度限定实现细节（数据库表名、首次判断方式）。这样的文档既能引导 AI Agent 快速理解项目，又保留了实现的灵活性！
 
-# 1.4 梳理需求
+# 梳理需求
   请先阅读以下项目文档：
 - .specify/memory/constitution.md（协作宪法，最高优先级）
 - spec.md（产品规格）
@@ -272,7 +272,7 @@
 
 按照 constitution.md 的要求：先复述需求与验收，列出问题，我确认后再继续。现阶段不要写任何代码。
 
-# 1.4 Output
+# Output
 1. 我理解的 MVP 核心需求复述
 
   登录/注册（Clerk）
@@ -421,20 +421,20 @@
   - /onboarding/work-type
   - /onboarding/resume
 
-  # 1.5 梳理需求
+  # 梳理需求
   Q1:需要根据 spec.md 的字段要求自行设计表结构并提供迁移脚本,需要补充的resume_parsed 表里的需要有一个上传状态来记录用户是否上传,上传状态需要在dashboard的"上传简历"区块显示,另外技能列表skills存储的数据需要用简单用逗号分隔或从文本中用关键词匹配,工作经历experiences存储的数据需要包括公司名 + 职位名 + 时间范围；哪怕只识别 1–2 段.                                                                   
   Q2:DB                                                                      
   Q3:pdf 的解析可以给你一个接口，调用案例参考：根目录下的example.py 文件,需要用到的api_key 是 sk-8ctP0KRe3MOjs8EHOurwvkjb7iWgyVrLOIyGqH2RwQlMQYC9,它解析出来的是pdf原始数据，没有可读性，接个大模型的api整理一下即可,然后大模型的api调用案例你可以参考根目录下的llm_example.py 文件,api_key 是一样的.你阅读完参考文件后要还有疑问的话再问我
   Q4需要,在根目录下的 /web 目录里搭建,作为 Next.js 工程目录      
   Q5:按你说的这套命名方案使用
 
-  # 1.5 Output
+  # Output
   好的，我已经理解了 API 调用方式。现在让我先检查当前的项目结构，然后按照 constitution.md 的要求创建 plan.md 和 tasks.md。
 
-  # 1.6 生成页面原型
+  # 生成页面原型
   根据项目需求以HTML形式输出最终界面展示效果
 
-  # 1.6 Output
+  # Output
   我理解您想要先看到界面的视觉效果。让我为您创建一个 HTML 原型演示，展示所有关键页面的布局和交互流程。
 
   按照 spec.md 的要求，我会创建以下页面的静态 HTML 演示：
@@ -443,7 +443,7 @@
   3. Onboarding 4 步（Role → Profile → Work Type → Resume）
   4. Dashboard（含首次引导高亮效果）
 
-  # 1.7 更改原型页面
+  # 更改原型页面
   要更改的部分：
   1.在sign up 界面没有体现发送邮箱验证码的功能
   2.Onboarding-Profile 页面的country输入框应该是下拉框配合字符猜想的形式
@@ -452,20 +452,20 @@
   5.从dashboard里点击4个onboarding的其中一个step跳转到编辑页面后仍然可以前后点击next或back而不是只有save按键保存并跳转会dashboard                                                     
   6.用户第一次进到dashboard时应该强制高亮引导用户dashboard的特性,引导过程缺少next按钮推荐引导过程
 
-  # 1.8 更改原型页面
+  # 更改原型页面
   1.验证邮箱不需要单独创建一个页面,只需要再confirm password 下面同一个表单中加一行email verification的输入框,输入框右边有一个发送按钮,用户在输入完正确的邮箱格式后点击发送按钮,将收到的验证码输入进新创建的输入框里就可以了                                                                  
   2.进入dashboard后用户想修改自己的profile,点击profile部分的任何一个步骤(例如role)进入编辑页除了编辑功能只有两个按钮,back和save,点击back回到dashboard,点击save保存记录回到dashboard  
 
-  # 1.9 澄清疑惑
+  # 澄清疑惑
   /speckit.clarify
 
-  # 2 计划
+  # 生成计划
   /speckit.plan
 
-  # 2.1 调整接口
+  # 调整接口
   简历解析实现方法我给你一个接口,调用案例参考example.py,调用该接口解析出来的是pdf 原始数据，没有可读性，接个大模型的api(参考llm_examply.py)整理一下即可,需要的话我可以提供apikey
 
-  # 2.1 Output
+  # Output
   明白了!你已经有了完整的 DMXAPI 接口解决方案:
 
   1. PDF 解析接口 (example.py): https://www.dmxapi.cn/v1/responses (模型: hehe-tywd)
@@ -473,14 +473,14 @@
 
   这比我之前研究的方案更好!让我更新相关文档
 
-  # 2.2 设定配置
+  # 设定配置
   我有一些开发上的要求,你帮我更新一下相关文件:
   登录 / 注册（Clerk）部分要求:
   1.使用 Clerk 的 Next.js 集成(2点)：
   在 app/layout.tsx 中配置 <ClerkProvider>；
   使用 Clerk 提供的 <SignIn />、<SignUp /> 或相应的路由组件
 
-  # 2.2 Output
+  # Output
   更新内容汇总
 
   1. spec.md - 功能规格
@@ -519,10 +519,10 @@
   - ✅ 使用 Clerk 默认行为即可
   - ✅ 在 Clerk Dashboard 中启用 Email verification
 
-  # 2.3 生成 Next.js + Clerk 基础结构
+  # 生成 Next.js + Clerk 基础结构
   文档里是否有包括在 /web 路径下生成 Next.js + Clerk 基础结构
 
-  # 2.3 Output
+  # Output
   文档已完整更新!
 
   现在 quickstart.md 包含了从零开始创建 Next.js + Clerk 项目的完整流程:
@@ -579,7 +579,7 @@
   6. 在 Clerk Dashboard 中启用邮箱验证
   7. 配置 Google OAuth (可选)
 
-  # 2.4 核查
+  # 核查
   只做规划，不要修改任何文件，也不要运行会改变项目状态的命令,检查计划是否包括以下内容:
   1. 需要修改的文件或模块清单
   2. 按依赖顺序排列的实现步骤
@@ -589,7 +589,7 @@
   6. 风险点与回滚方案
   等我确认计划后，你再进入执行并按计划逐步实现 
 
-  # 2.4 Output
+  # Output
   当前计划文档适合作为设计文档，但作为实施计划还需要补充：
 
   1. 添加实施步骤章节 (按依赖顺序)
@@ -597,7 +597,7 @@
   3. 添加验证步骤章节 (具体命令 + 检查清单)
   4. 添加风险与回滚章节 (风险识别 + 应对方案)
 
-  # 2.4 跟进补充
+  # 跟进补充
   添加的内容
 
   1. 实施步骤
@@ -639,10 +639,10 @@
   - 性能验证 (Lighthouse)
   - 本地开发验证 (Stripe CLI)
 
-  # 2.5 plan检查确认
+  # plan检查确认
   还有什么需要向我确认和建议的吗
 
-  # 2.5 Output
+  # Output
   需要确认的问题
 
   1. spec.md 中的超时重试描述需要同步更新
@@ -667,12 +667,12 @@
 
   建议: 改为 "Step 5: Initialize shadcn/ui (可选)" 或添加说明 "如果选择使用 shadcn/ui，执行以下步骤；否则可跳过此步骤"
 
-  # 2.5 细节优化
+  # 细节优化
   1.需要更新 spec.md 第 266 行，改为 "不自动重试，直接显示错误提示，允许用户手动重试“
   2.修改说明为"Step 5: Initialize shadcn/ui(本项目采用shadcn/ui)
   修改完让我审核 plan.md 
 
-  # 2.5 Output
+  # Output
   文档一致性检查 ✅
   ┌───────────────┬────────────────────────────────────┬──────────────────────┬──────┐
   │     文档      │            超时重试策略               │    shadcn/ui 说明    │ 状态 │
@@ -718,10 +718,10 @@
   13. 测试验证 (自动化 + 手动清单 + 性能 + 本地开发)
   14. Next Steps
 
-  # 2.6 key的处理
+  # key的处理
   帮我检查看看plan.md文档里是否有说明 "若使用外部 Resume Parser / LLM，需要说明怎么配置 key" 的处理方式?
 
-  # 2.6 Output
+  # Output
   检查结果：plan.md 中没有详细说明 DMXAPI key 的配置方式。
 
   现状分析：
@@ -750,7 +750,7 @@
 
   或者添加一个环境变量清单表格。需要我补充吗？
 
-  # 2.7 环境配置说明
+  # 环境配置说明
   这是我提供的环境配置说明,你可以添加至plan.md 的"环境配置”：    
   ### 环境配置（web/.env.local） 
   在 `web/` 目录创建 `.env.local`，从各服务 Dashboard 获取并配置以下变量。
@@ -771,28 +771,28 @@
   -NEXT_PUBLIC_STRIPE_PRICE_ID
   - APP_URL
 
-  # 2.7 Output
+  # Output
   plan.md 现已完整，包含 DMXAPI key 配置说明。可以继续审核或直接通过。
 
-  # 2.8 创建checklist
+  # 创建checklist
   /speckit.checklist
 
-  # 2.9 更改checklist
+  # 更改checklist
   将GATING项目设置为CHK001（秘密和无曝光）、CHK002（Stripe webhook签名验证+允许列表事件）、CHK006（受保护的路由一致性）。
   将CHK004/CHK005/CHK007降级为标准检查（MVP级别）。 将CHK003合并到CHK001中，以避免重复。 代码测试不需要完整的威胁模型文档；只需要轻量级的风险说明+缓解措施。
 
-  # 3 tasks生成
+  # tasks生成
   /speckit.tasks
 
-  # 3.1 更正
+  # 任务更正
   我的项目不考虑上线目前,建议：把所有 “Production-ready / Release gate” 改成:
   • “Code-test ready / Demo-ready / MVP-ready”
   • “Webhook & error handling complete (MVP-level)”
 
-  # 3.1 Output
+  # Output
   已将所有 "生产就绪/发布门控" 相关表述修改为 "代码测试就绪/Demo 就绪/MVP 就绪
 
-  # 4 分析代码
+  # 分析代码
   /speckit.analyze
 
   # Output
@@ -837,7 +837,7 @@
   2. [F2] 术语统一 - 代码风格问题，可后续 PR 统一
   3. [F3] axios 依赖 - 若使用 fetch 则删除，否则移除"可选"
 
-  # 4.1 完善task文档实现方式
+  # 完善task文档实现方式
   我接受修复 C1: Dashboard 首次引导实现方式和修复 C2: 进度条计算逻辑的修复建议。                                                                                                                       
   我也采纳修复 E1: 添加性能验证任务的想法，但有几点需要调整：                                                                                                                                          
   调整 1：LCP 的环境条件不要写死 “4G 网络” -  改成 "使用 Lighthouse（Chrome DevTools）在 Desktop profile 下测试；记录分数和 LCP 数值（目标 <3s，若未达标给出主要原因与最小修复建议）"                  
@@ -845,7 +845,7 @@
   >2s，记录原因（冷启动/DB/RLS/网络）并给出改进建议（可不实施）"                                                                                                                                       
   调整 3：任务优先级标注为 P2 或 “Nice-to-have” - 改成 "T079 / T079a 标为 [P2] 或写 “尽力完成，不阻塞交付” 
 
-  # 4.1 Output
+  # Output
   宪法对齐检查
 
   ✅ 无冲突发现
@@ -909,19 +909,19 @@
 
   3. 运行 TypeScript 类型检查
   npm run typecheck
-  # 预期：无错误输出
+  预期：无错误输出
 
   4. 运行 ESLint 检查
   npm run lint
-  # 预期：无错误输出
+  预期：无错误输出
 
   5. 启动开发服务器
   npm run dev
-  # 预期：看到 "Ready" 和 "http://localhost:3000"
+  预期：看到 "Ready" 和 "http://localhost:3000"
 
   6. 在浏览器访问
-  # 打开 http://localhost:3000
-  # 预期：看到 Next.js 默认欢迎页（带有 "Get started by editing..." 文字）
+  打开 http://localhost:3000
+  预期：看到 Next.js 默认欢迎页（带有 "Get started by editing..." 文字）
 
   # 生成基础结构
   本轮只做：T004、T005、T006。
@@ -1032,7 +1032,7 @@ T011 - 配置 Clerk 环境变量
   访问/dashboard现在能正确重定向到/sign-in,但有报错：
   我现在遇到 Clerk 登录页报错，需要你定位原因并用最小改动修复。
 
-  ## 现象
+  现象
   - 访问 /dashboard 时会被 middleware 重定向到 /sign-in（这部分 OK）
   - 但 /sign-in 页面控制台报错：
     1) GET /sign-in/SignIn_clerk_catch_all_check/... 404
@@ -1284,3 +1284,164 @@ T011 - 配置 Clerk 环境变量
 
   # Vercel 部署
   请帮我把当前项目部署到 Vercel，生成一个可访问的预览链接。项目的 GitHub 地址是 https://github.com/Al1enYang/Vibe-Coding---Jobpin-.git 
+
+  # Dashboard 页面框架
+  US3-A。本轮只做：T045、T046、T047。
+
+  要求：
+  - dashboard 页面结构搭好：欢迎区、进度条、onboarding模块区、简历区、订阅区（订阅先占位）
+  - 完成度计算规则按 spec.md（profile+resume+subscription）
+
+  # Output
+  验证功能点
+  ┌──────────┬──────────────────────────────────────────────────┐
+  │   功能   │                     验证方法                     │
+  ├──────────┼──────────────────────────────────────────────────┤
+  │ 欢迎头部 │ 显示 "Welcome back, {用户名}!"                   │
+  ├──────────┼──────────────────────────────────────────────────┤
+  │ 进度条   │ 根据数据库数据显示 0-100%，颜色正确              │
+  ├──────────┼──────────────────────────────────────────────────┤
+  │ 模块卡片 │ 4 个模块显示完成状态（✓/✗），点击跳转编辑        │
+  ├──────────┼──────────────────────────────────────────────────┤
+  │ 简历区   │ 如有数据显示结构化信息，否则显示 "Upload Resume" │
+  ├──────────┼──────────────────────────────────────────────────┤
+  │ 订阅区   │ 占位显示 Free/Pro 状态                           │
+  └──────────┴──────────────────────────────────────────────────┘
+  4. 已通过检查
+  - ✓ npm run typecheck - 无错误
+  - ✓ npm run lint - 仅警告（与本次改动无关）
+
+  # Logout 需求添加
+  在头部的右边添加一个logout按钮，实现一个logout功能，用户点击之后退出账户登录状态，返回 localhost:3000
+
+  # Output
+  变更内容
+
+  web/components/dashboard/welcome-header.tsx
+  - 使用 Clerk 的 SignOutButton 组件
+  - redirectUrl="/" 直接重定向到首页
+  - 按钮位于头部右侧，悬停时有高亮效果
+
+  点击 Logout 后会：
+  1. 清除 Clerk 登录状态
+  2. 重定向到 http://localhost:3000（Landing Page）
+
+  # Onboarding 模块区与编辑返回
+  US3-B。本轮只做：T048、T049。
+
+  关键要求：
+  - 4 个模块显示已完成/未完成
+  - 点击任意模块 → 跳转对应 onboarding 页面并预填充
+  - 编辑后 Save 直接返回 /dashboard（不需要按 onboarding 顺序继续）
+
+  # 补充需求
+  需要完善的地方：
+  在dashboard显示用户填好的模块状态，用户在onboardinng 完成的模块在dashboard页面应该显示绿色打勾，Profile Completion的进度也应该更改。如果在该模块有可选性的情况下用户只填了必选项的信息，那么该模块视为未完成。只有当该模块的所有信息都填了才视为完成，Work Type除外。Work Type 只要用户至少打勾选中任何一个选项时就视为完成，只有用户什么都不选直接跳过work type部分才视为未完成。如果用户在onboarding之后的dashboard页面进入模块补充填写所有option信息保存之后也需要更新模块完成状态
+
+  # 说明需求
+  请更改：在dashboard页面，Onboarding Progress部分，Role Name 的Not set状态应该改为"完成"的状态且和Resume一样左边的1改为打勾
+  如果模块的状态为"完成"，模块标签上显示"Completed" 
+  修改用户从dashboard进入Role Name，Profile，Work Type模块中的每个save按钮位置为居中
+
+  # 发现页面加载失败
+  我现在除了landing可以访问，其他什么都加载不出来，请找出原因
+
+  # Output
+  根本原因
+
+  middleware.ts 缺少 matcher 导出。这导致 Clerk 中间件无法正确识别应该处理哪些路由，重定向时生成了无效的 /clerk_* 路径而不是 /sign-in。
+
+  验收场景 1：
+  1. 完成 RoleName → 只填写 Profile 必填项（不填 country/city）→ 勾选一个 Work Type → 上传 Resume 成功 → Start
+  2. 预期结果：
+    - Role Name: 绿勾 ✓
+    - Profile: 未完成（因为 country/city 为空）
+    - Work Type: 绿勾 ✓
+    - Resume: 绿勾 ✓
+    - Profile Completion: 15% + 10% + 35% = 65%
+
+  验收场景 2：
+  1. Edit → Profile 填写所有字段（包括 country/city）
+  2. 预期结果：
+    - Profile: 绿勾 ✓
+    - Profile Completion: 15% + 40% + 10% + 35% = 100%
+
+  数据来源完全来自 Supabase，通过 clerk_user_id 查询，Dashboard 作为 server component 获取数据，保存后会立即反映最新状态。
+
+  # 引导模块
+  请实现首次引导（T055–T057）在 Dashboard 页面以“高亮 + 遮罩 + 气泡提示 + OK/Next 推进”的方式分 4 步展示：①Resume Summary → ②Experiences → ③Subscription → ④Upgrade 按钮；要求只在“首次进入 Dashboard  
+  且用户已登录”时触发，首次判断逻辑为：先读 localStorage.has_seen_dashboard_tour（true 则不显示），若没有该值/为 false，再从 Supabase 的 user_profiles.has_seen_dashboard_guide 读取（true             
+  则不显示），否则显示引导；引导组件需支持 Next/OK 推进与关闭（关闭也视为完成），每一步必须准确高亮对应 DOM（给 Dashboard 各区域加稳定的 data-tour="resume-summary" / "experiences" / "subscription" / 
+  "upgrade" 选择器，避免依赖 className），并在高亮旁展示简短说明文案；完成第 4 步或关闭时，必须同时写入 localStorage.setItem('has_seen_dashboard_tour','true')，并更新 Supabase                        
+  user_profiles.has_seen_dashboard_guide=true（以 clerk_user_id 定位记录），更新失败不阻塞 UI 但要 console.warn 记录；实现限制：只改动与本功能相关的文件，小步提交，改完给出验证步骤（登录新用户→进入  
+  Dashboard 自动弹出→逐步 Next→完成后刷新不再出现；清空 localStorage 且 DB=false 时仍会出现；DB=true 时不出现）。                                                                                                   
+  如果我的说明与文档有冲突跟我说，最后执行完了给我验证步骤。
+
+  # 实际效果与预期有误，进行调整
+  高亮方式修改说明：用户第一次访问dashboard页面时应该依次按顺序弹出4步引导
+  第一步：高亮 "Profile Completion"区域
+  第二步：高亮 "Onboarding Progress"区域
+  第三步：高亮 "Resume Summary"区域
+  第四步：高亮"Subscription"区域
+
+  引导形式为背景暗，设置窗口滑轮位置与高亮区的top边框的position平行，高亮区应该有一个边框，高亮区旁边（可以是上下左右）应该有一个小"对话框"一句话说明高亮区是什么，然后对话框里有一个可以推进引导过程  
+  的按钮，用户点击完第四步最后一个对话框的按钮后退出高亮模式，显示正常的dashboard页面
+
+  # Output
+  验证步骤
+
+  1.清空 localStorage
+  localStorage.removeItem('has_seen_dashboard_tour')
+  2.重置 DB
+  UPDATE user_profiles SET has_seen_dashboard_guide = false WHERE clerk_user_id = 'your_clerk_user_id';
+  3.刷新 Dashboard
+
+  预期效果：
+  - 步骤 ①：对话框在 Profile Completion 下方
+  - 步骤 ②：对话框在 Onboarding Progress 下方
+  - 步骤 ③：对话框在 Resume Summary 右边
+  - 步骤 ④：对话框在 Subscription 下方
+
+  # Stripe 开发前审查
+  请先做“审查与确认”，不要改代码。
+
+  目标：准备执行 US4（Stripe 订阅）任务，范围仅限 tasks.md 的 T016–T018 + T058–T071。
+
+  请你：
+  1) 先复述 US4 的验收点（Dashboard 显示 Free/Pro、Upgrade/Manage；Checkout；Webhook 写 subscriptions；Portal；Pending Syncing）。
+  2) 检查 repo 里是否已存在 Stripe 相关文件/路由（lib/stripe.ts、api/stripe/*、dashboard/subscription-status.tsx）。
+  3) 列出执行 US4 前置所需的环境变量与来源（STRIPE_SECRET_KEY、STRIPE_WEBHOOK_SECRET、NEXT_PUBLIC_STRIPE_PRICE_ID、APP_URL），并指出  哪些需要我去 Stripe Dashboard/CLI 获取。
+  4) 把你发现的“需要我确认”的问题列出来，等我确认后再开始执行任何任务。
+
+  注意：不要引入新架构，不要顺手重构；不写入真实 key；遵守宪法流程。
+
+  # Output
+  要确认的问题
+
+  请确认以下问题后再开始执行：
+
+  Q1: Stripe 账号状态
+  - 你是否已有 Stripe 账号？（Test 模式即可）
+  - 是否需要我提供 Stripe CLI 的安装和基础使用说明？
+
+  Q2: Product/Price 配置
+  - Product 名称和描述用什么？（建议：JobPin Pro / Monthly subscription）
+  - Price 确认是 $9/月 吗？
+
+  Q3: 现有 Dashboard 订阅区域
+  - 当前 Dashboard 右下角的 Subscription 区域是占位符（硬编码），实现时我会替换为真正的 subscription-status.tsx 组件
+  - 这样可以吗？还是你希望保留某些现有样式？
+
+  Q4: Pending 状态触发条件
+  - 当用户完成 Checkout 但 webhook 还未到达时，显示 "Syncing..."
+  - 我会通过检查 DB 中是否存在 subscription 记录来判断 Pending
+  - 这个逻辑可以吗？
+
+  Q5: 任务执行顺序
+  - 我计划按以下顺序执行：T016-T018（配置）→ T058-T061（Checkout）→ T062-T068（Webhook）→ T069-T071（Portal + Pending）
+  - 可以吗？
+
+  # 修改 状态更新 问题
+  现在订阅状态区未显示当前的订阅计划，需改动的点：
+  订阅成功后更新订阅状态信息为Pro – $9 / month ← 单行显示， Next billing: January 11, 2026
+  另外添加取消订阅需求，用户点击 Manage Subscription，进入到 stripe 里点击cancel subscription 后更新用户订阅状态并返回 dashboard，订阅状态区也变回订阅前的状态
