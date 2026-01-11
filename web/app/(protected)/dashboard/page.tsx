@@ -5,7 +5,7 @@ import { fetchDashboardData } from '@/lib/dashboard';
 import { WelcomeHeader } from '@/components/dashboard/welcome-header';
 import { ProfileProgress } from '@/components/dashboard/profile-progress';
 import { DashboardClient } from '@/components/dashboard/dashboard-client';
-import { SubscriptionStatus } from '@/components/dashboard/subscription-status';
+import { SubscriptionStatusWrapper } from '@/components/dashboard/subscription-status-wrapper';
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -265,7 +265,7 @@ export default async function DashboardPage() {
             {/* Subscription Section */}
             <section data-tour="subscription" className="p-6 bg-card border border-border rounded-xl">
               <h2 className="text-xl font-semibold mb-4 text-foreground">Subscription</h2>
-              <SubscriptionStatus subscription={subscription} />
+              <SubscriptionStatusWrapper subscription={subscription} />
             </section>
           </div>
         </div>
