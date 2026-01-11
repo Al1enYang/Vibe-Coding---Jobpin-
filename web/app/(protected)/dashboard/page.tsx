@@ -5,6 +5,7 @@ import { fetchDashboardData } from '@/lib/dashboard';
 import { WelcomeHeader } from '@/components/dashboard/welcome-header';
 import { ProfileProgress } from '@/components/dashboard/profile-progress';
 import { DashboardClient } from '@/components/dashboard/dashboard-client';
+import { SubscriptionStatus } from '@/components/dashboard/subscription-status';
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -15,6 +16,15 @@ export default async function DashboardPage() {
 
   // Fetch dashboard data
   const { profile, resume, subscription } = await fetchDashboardData(userId);
+
+  // Debug log to verify subscription data
+  console.log('[Dashboard] Subscription data:', {
+    userId,
+    subscription,
+    nextBillingDate: subscription?.next_billing_date,
+    plan: subscription?.plan,
+    active: subscription?.active,
+  });
 
   return (
     <DashboardClient profile={profile} resume={resume} subscription={subscription}>
@@ -252,43 +262,10 @@ export default async function DashboardPage() {
 
           {/* Right Column: Subscription */}
           <div className="lg:col-span-1">
-            {/* Subscription Section (Placeholder for now) */}
+            {/* Subscription Section */}
             <section data-tour="subscription" className="p-6 bg-card border border-border rounded-xl">
               <h2 className="text-xl font-semibold mb-4 text-foreground">Subscription</h2>
-
-              {subscription?.active && subscription.plan === 'pro' ? (
-                <div className="space-y-4">
-                  <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
-                    <p className="text-sm font-medium text-green-500">Pro Plan</p>
-                    <p className="text-xs text-muted-foreground mt-1">$9/month</p>
-                  </div>
-                  {subscription.next_billing_date && (
-                    <p className="text-sm text-muted-foreground">
-                      Next billing: {new Date(subscription.next_billing_date).toLocaleDateString()}
-                    </p>
-                  )}
-                  <a
-                    href="#"
-                    className="block w-full text-center px-4 py-2 bg-secondary text-secondary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
-                  >
-                    Manage Subscription
-                  </a>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="p-4 bg-muted/50 rounded-lg">
-                    <p className="text-sm font-medium text-foreground">Free Plan</p>
-                    <p className="text-xs text-muted-foreground mt-1">Basic features</p>
-                  </div>
-                  <a
-                    href="#"
-                    data-tour="upgrade"
-                    className="block w-full text-center px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
-                  >
-                    Upgrade to Pro
-                  </a>
-                </div>
-              )}
+              <SubscriptionStatus subscription={subscription} />
             </section>
           </div>
         </div>
