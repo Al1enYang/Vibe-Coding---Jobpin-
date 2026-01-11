@@ -1,8 +1,6 @@
-# Jobpin AI 复刻（MVP）
+## 简要介绍
 
-一个轻量级的 jobpin.ai 仿制应用，聚焦核心流程：**登录/注册 → Onboarding（4 步）→ 简历上传与解析 → Dashboard → Stripe 订阅（Test 模式）**。
-
-本项目用于 Vibe Coding / AI 辅助编码的 Code Test。UI 不追求高度还原，但会做基础样式与少量定制，以贴近 jobpin.ai 的整体观感。
+这是一个仿 jobpin.ai 的求职助手 MVP：用户先通过 Clerk 注册/登录，按 4 步完成 Onboarding（RoleName → Profile → Work Type（可选）→ 上传简历并解析），完成后进入 Dashboard 查看个人信息、简历解析结果与订阅状态，并可通过 Stripe（Test 模式） 开通每月订阅（$9/月）。简历解析通过外部 PDF 解析服务提取文本，再由 LLM 将内容结构化为 JSON，并将结构化结果写入 Supabase。
 
 ---
 
@@ -85,6 +83,16 @@ npm run lint
 npm run typecheck
 ```
 如果 typecheck 尚未配置，可添加脚本:tsc --noEmit
+
+### 3.4 Stripe Test 模式说明
+•	使用 Test 卡号付款：4242 4242 4242 4242（任意未来有效期、任意 CVC）
+
+### 3.5 重置第一次登录
+# 清空 localStorage
+localStorage.removeItem('has_seen_dashboard_tour')
+
+# 重置 DB
+UPDATE user_profiles SET has_seen_dashboard_guide = false WHERE clerk_user_id = 'your_clerk_user_id';
 
 ## 4. 本地运行环境变量配置(必须)
 创建 web/.env.local 文件，并填入以下变量(示例为占位符):
