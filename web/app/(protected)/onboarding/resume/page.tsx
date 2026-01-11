@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { ResumeUpload, UploadStatus } from '@/components/onboarding/resume-upload';
 import { ResumeResults } from '@/components/onboarding/resume-results';
 import type { ResumeParsingResult } from '@/types/database';
 import { completeOnboarding } from '@/lib/actions/resume';
 
-export default function ResumePage() {
+function ResumePageContent() {
   const searchParams = useSearchParams();
   const isEditMode = searchParams.get('edit') === '1';
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>('idle');
@@ -254,5 +254,13 @@ export default function ResumePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ResumePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen p-8 flex items-center justify-center"><div className="text-muted-foreground">Loading...</div></div>}>
+      <ResumePageContent />
+    </Suspense>
   );
 }

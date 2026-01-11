@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { saveProfile, getProfile } from '@/lib/actions/profile';
 
-export default function ProfilePage() {
+function ProfilePageContent() {
   const searchParams = useSearchParams();
   const isEditMode = searchParams.get('edit') === '1';
   const [firstName, setFirstName] = useState('');
@@ -221,5 +221,13 @@ export default function ProfilePage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen p-8 flex items-center justify-center"><div className="text-muted-foreground">Loading...</div></div>}>
+      <ProfilePageContent />
+    </Suspense>
   );
 }

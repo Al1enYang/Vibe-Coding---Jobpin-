@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { saveRoleName, getRoleName } from '@/lib/actions/rolename';
 
-export default function RoleNamePage() {
+function RoleNamePageContent() {
   const searchParams = useSearchParams();
   const isEditMode = searchParams.get('edit') === '1';
 
@@ -152,5 +152,13 @@ export default function RoleNamePage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function RoleNamePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen p-8 flex items-center justify-center"><div className="text-muted-foreground">Loading...</div></div>}>
+      <RoleNamePageContent />
+    </Suspense>
   );
 }
