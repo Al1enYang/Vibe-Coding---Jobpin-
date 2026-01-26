@@ -56,32 +56,56 @@ export async function saveRoleName(
     timestamp: new Date().toISOString(),
   });
 
-  const { data, error, status, statusText } = await supabaseAdmin
-    .from('user_profiles')
-    .upsert(
-      {
-        clerk_user_id: userId,
-        email: email,
-        role_name: roleName.trim(),
-        updated_at: new Date().toISOString(),
-      },
-      {
-        onConflict: 'clerk_user_id',
-        ignoreDuplicates: false,
-      }
-    )
-    .select();
+  try {
+    const { data, error, status, statusText } = await supabaseAdmin
+      .from('user_profiles')
+      .upsert(
+        {
+          clerk_user_id: userId,
+          email: email,
+          role_name: roleName.trim(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          onConflict: 'clerk_user_id',
+          ignoreDuplicates: false,
+        }
+      )
+      .select();
 
-  if (error) {
-    console.error('[saveRoleName] Supabase error:', {
-      message: error.message,
-      code: error.code,
-      details: error.details,
-      hint: error.hint,
-      status,
-      statusText,
+    if (error) {
+      console.error('[saveRoleName] Supabase error:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        status,
+        statusText,
+      });
+      return { error: `Failed to save: ${error.message} (${error.code})` };
+    }
+
+    console.log('[saveRoleName] Success:', data);
+  } catch (fetchError: any) {
+    console.error('[saveRoleName] Fetch/network error:', {
+      name: fetchError?.name,
+      message: fetchError?.message,
+      cause: fetchError?.cause,
+      stack: fetchError?.stack,
     });
-    return { error: `Failed to save: ${error.message} (${error.code})` };
+
+    // Provide more helpful error message
+    let errorMessage = 'Failed to save: Network error';
+    if (fetchError?.cause) {
+      if (fetchError.cause.code === 'ENOTFOUND') {
+        errorMessage = 'Failed to save: Supabase URL not found. Please check your NEXT_PUBLIC_SUPABASE_URL in .env.local';
+      } else if (fetchError.cause.code === 'ECONNREFUSED') {
+        errorMessage = 'Failed to save: Connection refused. Check if Supabase project is active';
+      } else {
+        errorMessage = `Failed to save: ${fetchError.cause.code || 'Unknown network error'}`;
+      }
+    }
+    return { error: errorMessage };
   }
 
   console.log('[saveRoleName] Success:', data);

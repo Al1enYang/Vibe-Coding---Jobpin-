@@ -1,11 +1,25 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { Subscription } from '@/types/database';
 
-// Show reset button in development mode
-const isDevelopment = process.env.NODE_ENV === 'development';
+// Format next billing date - simple manual formatting to avoid locale issues
+// Moved outside component to avoid re-creation on each render
+const formatBillingDate = (dateStr: string | null | undefined) => {
+  if (!dateStr) return null;
+  try {
+    const date = new Date(dateStr);
+    const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'];
+    const month = months[date.getMonth()];
+    const day = date.getDate();
+    const year = date.getFullYear();
+    return `${month} ${day}, ${year}`;
+  } catch {
+    return null;
+  }
+};
 
 interface SubscriptionStatusProps {
   subscription: Subscription | null;
@@ -15,8 +29,20 @@ export function SubscriptionStatus({ subscription }: SubscriptionStatusProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  // Check if development mode - only after client mount to avoid hydration mismatch
+  const isDevelopment = useMemo(() => {
+    if (!isMounted) return false;
+    return process.env.NODE_ENV === 'development';
+  }, [isMounted]);
+
+  // Set mounted state on client side only
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Auto-refresh when returning from Stripe Portal (portal_return=true)
   const isSyncing = searchParams.get('portal_return') === 'true';
@@ -31,35 +57,12 @@ export function SubscriptionStatus({ subscription }: SubscriptionStatusProps) {
     }
   }, [isSyncing]);
 
-  // Debug log for subscription data
-  useEffect(() => {
-    console.log('[SubscriptionStatus] Props:', { subscription });
-    console.log('[SubscriptionStatus] next_billing_date:', subscription?.next_billing_date);
-    console.log('[SubscriptionStatus] Formatted date:', formatBillingDate(subscription?.next_billing_date));
-  }, [subscription]);
-
   // Check if subscription exists and is active
   const hasActiveSubscription = subscription?.active && subscription?.plan === 'pro';
 
   // Check if user just returned from Stripe Checkout (pending state)
   // URL will have session_id param but subscription won't be active yet
   const isPending = !hasActiveSubscription; // Simplified: if no active sub, show Free plan
-
-  // Format next billing date - simple manual formatting to avoid locale issues
-  const formatBillingDate = (dateStr: string | null | undefined) => {
-    if (!dateStr) return null;
-    try {
-      const date = new Date(dateStr);
-      const months = ['January', 'February', 'March', 'April', 'May', 'June',
-                      'July', 'August', 'September', 'October', 'November', 'December'];
-      const month = months[date.getMonth()];
-      const day = date.getDate();
-      const year = date.getFullYear();
-      return `${month} ${day}, ${year}`;
-    } catch {
-      return null;
-    }
-  };
 
   const handleUpgrade = async () => {
     setIsLoading(true);

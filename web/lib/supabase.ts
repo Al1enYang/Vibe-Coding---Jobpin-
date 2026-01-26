@@ -3,6 +3,13 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
+// Debug: Log environment configuration
+console.log('[Supabase Config] Initializing with:', {
+  url: supabaseUrl,
+  hasAnonKey: !!supabaseAnonKey,
+  nodeEnv: process.env.NODE_ENV,
+});
+
 if (!supabaseUrl) {
   throw new Error('Missing env.NEXT_PUBLIC_SUPABASE_URL');
 }
